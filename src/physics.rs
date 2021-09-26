@@ -5,6 +5,7 @@ pub struct DT(pub f32);
 
 pub struct Mass(pub f32);
 
+#[derive(Default)]
 pub struct Kinematics {
     pub pos: Vec2,
     pub vel: Vec2,

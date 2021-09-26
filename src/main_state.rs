@@ -25,7 +25,18 @@ impl MainState {
             SystemStage::single_threaded().with_system(physics::integration_sys.system()),
         );
 
-        let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
+
+        let rocket = world.spawn().insert_bundle(
+            RocketBundle {
+                kinematics: Kinematics {
+                    acc: Vec2::new(0.0, -5000.0),
+                    pos: Vec2::new(500.0, 800.0),
+                    ..Kinematics::default()
+                },
+                ..RocketBundle::default()
+            }
+        ).id();
+
         world.insert_resource(RocketEntity(rocket));
 
         MainState { world, schedule }
@@ -36,7 +47,7 @@ impl MainState {
 
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-        draw_rectangle(kinematics.pos.x, kinematics.pos.y, 10.0, 10.0, WHITE);
+        draw_rectangle(kinematics.pos.x / 1000.0 * screen_width(), kinematics.pos.y / 1000.0 * screen_height(), 10.0, 10.0, WHITE);
 
         Ok(())
     }
