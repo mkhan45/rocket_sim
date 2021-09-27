@@ -1,21 +1,22 @@
-use macroquad::prelude::Vec2;
+// use macroquad::prelude::{Vec2, Rect};
 
-pub struct Camera {
-    pub pos: Vec2,
-    pub size: Vec2,
-}
+use bevy::prelude::*;
+use macroquad::prelude::{set_camera, Camera2D, Rect};
 
-impl Default for Camera {
+pub struct CameraRes(pub Camera2D);
+impl Default for CameraRes {
     fn default() -> Self {
-        Camera {
-            pos: Vec2::new(0.0, 0.0),
-            size: Vec2::new(crate::SCREEN_WIDTH, crate::SCREEN_HEIGHT),
-        }
+        CameraRes(Camera2D::from_display_rect(Rect::new(
+            -crate::SCREEN_WIDTH / 2.0,
+            -crate::SCREEN_HEIGHT,
+            crate::SCREEN_WIDTH * 2.0,
+            crate::SCREEN_HEIGHT * 2.0,
+        )))
     }
 }
 
-impl Camera {
-    pub fn transform_point(point: &Vec2) -> Vec2 {
-        todo!()
+pub fn update_camera_sys(camera: Res<CameraRes>) {
+    if camera.is_changed() {
+        set_camera(&camera.0);
     }
 }

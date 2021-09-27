@@ -10,6 +10,8 @@ use crate::physics::{self, DT};
 use crate::rocket::{RocketBundle, RocketEntity};
 use crate::GameError;
 
+use crate::camera;
+
 pub struct MainState {
     world: World,
     schedule: Schedule,
@@ -24,17 +26,17 @@ impl MainState {
             "physics",
             SystemStage::single_threaded()
                 .with_system(physics::rocket_thrust_sys.system())
-                .with_system(physics::rocket_gravity_sys.system())
+                .with_system(physics::rocket_gravity_sys.system()),
         );
         schedule.add_stage(
             "integrate",
-            SystemStage::single_threaded()
-                .with_system(physics::integration_sys.system())
+            SystemStage::single_threaded().with_system(physics::integration_sys.system()),
         );
         schedule.add_stage(
             "cleanup",
             SystemStage::single_threaded()
-                .with_system(physics::reset_accel_sys.system()),
+                .with_system(physics::reset_accel_sys.system())
+                .with_system(camera::update_camera_sys.system()),
         );
 
         let rocket = world
@@ -47,8 +49,9 @@ impl MainState {
                 ..RocketBundle::default()
             })
             .id();
-
         world.insert_resource(RocketEntity(rocket));
+
+        world.insert_resource(crate::camera::CameraRes::default());
 
         MainState { world, schedule }
     }

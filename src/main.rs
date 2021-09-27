@@ -7,6 +7,8 @@ pub mod main_state;
 pub mod physics;
 pub mod rocket;
 
+pub mod camera;
+
 pub const SCREEN_WIDTH: f32 = 1000.0;
 pub const SCREEN_HEIGHT: f32 = 1000.0;
 
