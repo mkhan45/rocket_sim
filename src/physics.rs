@@ -1,3 +1,4 @@
+use crate::rocket::Rocket;
 use bevy::prelude::*;
 use macroquad::prelude::Vec2;
 
@@ -17,7 +18,35 @@ pub fn integration_sys(mut query: Query<&mut Kinematics>, dt: Res<DT>) {
         let accel = kinematics.acc;
         kinematics.vel += accel * dt.0 * dt.0 * 0.5;
 
+        dbg!(kinematics.vel);
+
         let vel = kinematics.vel;
         kinematics.pos += vel * dt.0;
+    }
+}
+
+pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: Res<DT>) {
+    let rockets = query.iter_mut().filter(|(_, rocket)| rocket.fuel_mass > 0.0);
+    for (mut kinematics, mut rocket) in rockets {
+        let mass = rocket.total_mass();
+        let fuel_burned = rocket.fuel_burn_rate * dt.0;
+        let thrust_force = fuel_burned * rocket.fuel_thrust_factor;
+        kinematics.acc -= Vec2::new(0.0, thrust_force / mass * crate::THRUST_MULTIPLIER);
+
+        dbg!(rocket.fuel_mass);
+
+        rocket.fuel_mass -= fuel_burned;
+    }
+}
+
+pub fn rocket_gravity_sys(mut query: Query<(&mut Kinematics, &Rocket)>) {
+    for (mut kinematics, _) in query.iter_mut() {
+        kinematics.acc.y += crate::GRAVITY;
+    }
+}
+
+pub fn reset_accel_sys(mut query: Query<&mut Kinematics>) {
+    for mut kinematics in query.iter_mut() {
+        kinematics.acc = Vec2::new(0.0, 0.0)
     }
 }

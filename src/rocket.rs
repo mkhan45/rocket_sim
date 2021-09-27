@@ -5,6 +5,33 @@ use crate::physics::Kinematics;
 #[derive(Bundle, Default)]
 pub struct RocketBundle {
     pub kinematics: Kinematics,
+    pub rocket: Rocket,
 }
 
 pub struct RocketEntity(pub bevy::ecs::entity::Entity);
+
+pub struct Rocket {
+    pub fuel_mass: f32,
+    pub non_fuel_mass: f32,
+    /// how fast the fuel burns
+    pub fuel_burn_rate: f32,
+    /// how much force per fuel unit
+    pub fuel_thrust_factor: f32,
+}
+
+impl Default for Rocket {
+    fn default() -> Self {
+        Rocket {
+            fuel_mass: 500.0,
+            non_fuel_mass: 500.0,
+            fuel_burn_rate: 100.0,
+            fuel_thrust_factor: 2000.0,
+        }
+    }
+}
+
+impl Rocket {
+    pub fn total_mass(&self) -> f32 {
+        self.fuel_mass + self.non_fuel_mass
+    }
+}
