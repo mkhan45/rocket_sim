@@ -62,8 +62,8 @@ impl MainState {
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
         draw_rectangle(
-            kinematics.pos.x / 1000.0 * screen_width(),
-            kinematics.pos.y / 1000.0 * screen_height(),
+            kinematics.pos.x,
+            kinematics.pos.y,
             10.0,
             10.0,
             WHITE,
