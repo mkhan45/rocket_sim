@@ -11,7 +11,8 @@ pub struct RocketBundle {
 pub struct RocketEntity(pub bevy::ecs::entity::Entity);
 
 pub struct Rocket {
-    pub fuel_mass: f32,
+    pub fuel_capacity: f32,
+    pub current_fuel_mass: f32,
     pub non_fuel_mass: f32,
     /// how fast the fuel burns
     pub fuel_burn_rate: f32,
@@ -22,7 +23,8 @@ pub struct Rocket {
 impl Default for Rocket {
     fn default() -> Self {
         Rocket {
-            fuel_mass: 450.0,
+            fuel_capacity: 400.0,
+            current_fuel_mass: 400.0,
             non_fuel_mass: 500.0,
             fuel_burn_rate: 100.0,
             fuel_thrust_factor: 2000.0,
@@ -32,6 +34,6 @@ impl Default for Rocket {
 
 impl Rocket {
     pub fn total_mass(&self) -> f32 {
-        self.fuel_mass + self.non_fuel_mass
+        self.current_fuel_mass + self.non_fuel_mass
     }
 }

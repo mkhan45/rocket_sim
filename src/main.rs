@@ -9,6 +9,8 @@ pub mod rocket;
 
 pub mod camera;
 
+pub mod ui;
+
 pub const SCREEN_WIDTH: f32 = 1000.0;
 pub const SCREEN_HEIGHT: f32 = 1000.0;
 
@@ -22,6 +24,7 @@ async fn main() -> Result<(), GameError> {
     loop {
         main_state.draw()?;
         main_state.update()?;
+        main_state.draw_ui()?;
 
         next_frame().await
     }

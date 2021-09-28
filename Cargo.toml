@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 macroquad = "0.3"
 bevy = { version = "0.5.0", features = ["dynamic"] }
+egui-macroquad = "0.6.1"

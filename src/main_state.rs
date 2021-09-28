@@ -13,7 +13,7 @@ use crate::GameError;
 use crate::camera;
 
 pub struct MainState {
-    world: World,
+    pub world: World,
     schedule: Schedule,
 }
 
