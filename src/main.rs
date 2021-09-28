@@ -1,3 +1,4 @@
+use egui_macroquad::macroquad;
 use macroquad::prelude::*;
 
 pub mod error;

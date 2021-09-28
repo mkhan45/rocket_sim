@@ -1,7 +1,5 @@
-// use macroquad::prelude::{Vec2, Rect};
-
-use bevy::prelude::*;
-use macroquad::prelude::{screen_height, screen_width, set_camera, Camera2D, Rect};
+use egui_macroquad::macroquad::prelude::{screen_height, screen_width, set_camera, Camera2D, Rect, Vec2};
+use bevy_ecs::prelude::*;
 
 pub struct CameraRes {
     pub camera: Camera2D,

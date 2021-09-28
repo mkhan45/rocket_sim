@@ -1,6 +1,6 @@
 use crate::rocket::Rocket;
-use bevy::prelude::*;
-use macroquad::prelude::Vec2;
+use bevy_ecs::prelude::*;
+use egui_macroquad::macroquad::prelude::Vec2;
 
 pub struct DT(pub f32);
 

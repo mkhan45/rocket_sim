@@ -1,10 +1,10 @@
 use crate::physics::Kinematics;
 
-use bevy::ecs::schedule::{Schedule, SystemStage};
-use bevy::ecs::world::World;
-use bevy::prelude::{IntoSystem, Stage};
+use bevy_ecs::schedule::{Schedule, SystemStage};
+use bevy_ecs::world::World;
+use bevy_ecs::prelude::{IntoSystem, Stage};
 
-use macroquad::prelude::*;
+use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::{self, DT};
 use crate::rocket::{RocketBundle, RocketEntity};

@@ -1,4 +1,4 @@
-use bevy::prelude::Bundle;
+use bevy_ecs::prelude::Bundle;
 
 use crate::physics::Kinematics;
 
@@ -8,7 +8,7 @@ pub struct RocketBundle {
     pub rocket: Rocket,
 }
 
-pub struct RocketEntity(pub bevy::ecs::entity::Entity);
+pub struct RocketEntity(pub bevy_ecs::entity::Entity);
 
 pub struct Rocket {
     pub fuel_capacity: f32,

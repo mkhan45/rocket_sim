@@ -5,12 +5,12 @@ use crate::rocket::Rocket;
 use crate::rocket::RocketEntity;
 use egui_macroquad::egui;
 
-use bevy::ecs::entity::Entity;
+use bevy_ecs::entity::Entity;
 
 use egui_macroquad::egui::Pos2;
 use egui_macroquad::egui::Rect as EguiRect;
 use egui_macroquad::egui::Vec2 as EguiVec;
-use macroquad::prelude::{screen_height, screen_width, Rect};
+use egui_macroquad::macroquad::prelude::{screen_height, screen_width, Rect};
 
 fn _to_egui_rect(rect: &Rect) -> EguiRect {
     EguiRect::from_two_pos(
