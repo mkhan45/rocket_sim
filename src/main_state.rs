@@ -28,11 +28,13 @@ impl MainState {
                 .with_system(physics::rocket_thrust_sys.system())
                 .with_system(physics::rocket_gravity_sys.system()),
         );
-        schedule.add_stage(
+        schedule.add_stage_after(
+            "physics",
             "integrate",
             SystemStage::single_threaded().with_system(physics::integration_sys.system()),
         );
-        schedule.add_stage(
+        schedule.add_stage_after(
+            "integrate",
             "cleanup",
             SystemStage::single_threaded()
                 .with_system(physics::reset_accel_sys.system())
@@ -61,13 +63,7 @@ impl MainState {
 
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-        draw_rectangle(
-            kinematics.pos.x,
-            kinematics.pos.y,
-            10.0,
-            10.0,
-            WHITE,
-        );
+        draw_rectangle(kinematics.pos.x, kinematics.pos.y, 10.0, 10.0, WHITE);
 
         Ok(())
     }

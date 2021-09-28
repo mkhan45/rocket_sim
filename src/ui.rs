@@ -52,7 +52,10 @@ impl MainState {
 
         ui.horizontal(|ui| {
             ui.label("Fuel Remaining:");
-            ui.add(egui::ProgressBar::new(fuel_used_proportion));
+            ui.add(
+                egui::ProgressBar::new(fuel_used_proportion)
+                    .text(format!("Remaining: {:.2}", rocket.current_fuel_mass)),
+            );
         });
     }
 
@@ -61,7 +64,9 @@ impl MainState {
 
         ui.label(format!(
             "Velocity: <{:.2}, {:.2}>",
-            kinematics.vel.x, kinematics.vel.y
+            kinematics.vel.x, -kinematics.vel.y
         ));
+
+        ui.label(format!("Altitude: {:.2}", -kinematics.pos.y));
     }
 }

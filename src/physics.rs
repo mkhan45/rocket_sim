@@ -15,11 +15,12 @@ pub struct Kinematics {
 
 pub fn integration_sys(mut query: Query<&mut Kinematics>, dt: Res<DT>) {
     for mut kinematics in query.iter_mut() {
-        let accel = kinematics.acc;
-        kinematics.vel += accel * dt.0 * dt.0 * 0.5;
-
+        let dt = dt.0;
         let vel = kinematics.vel;
-        kinematics.pos += vel * dt.0;
+        let accel = kinematics.acc;
+
+        kinematics.pos += vel * dt + 0.5 * accel * dt * dt;
+        kinematics.vel += accel * dt;
     }
 }
 
@@ -34,6 +35,7 @@ pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: R
         kinematics.acc -= Vec2::new(0.0, thrust_force / mass * crate::THRUST_MULTIPLIER);
 
         rocket.current_fuel_mass -= fuel_burned;
+        rocket.current_fuel_mass = rocket.current_fuel_mass.max(0.0);
     }
 }
 
