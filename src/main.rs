@@ -20,6 +20,7 @@ pub const GRAVITY: f32 = 200.0;
 
 #[macroquad::main("Rocket")]
 async fn main() -> Result<(), GameError> {
+    next_frame().await;
     let mut main_state = main_state::MainState::new();
 
     loop {

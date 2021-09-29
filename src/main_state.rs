@@ -1,8 +1,8 @@
 use crate::physics::Kinematics;
 
+use bevy_ecs::prelude::{IntoSystem, Stage};
 use bevy_ecs::schedule::{Schedule, SystemStage};
 use bevy_ecs::world::World;
-use bevy_ecs::prelude::{IntoSystem, Stage};
 
 use egui_macroquad::macroquad::prelude::*;
 
@@ -45,7 +45,7 @@ impl MainState {
             .spawn()
             .insert_bundle(RocketBundle {
                 kinematics: Kinematics {
-                    pos: Vec2::new(500.0, 800.0),
+                    pos: Vec2::new(0.0, crate::SCREEN_HEIGHT * 0.8),
                     ..Kinematics::default()
                 },
                 ..RocketBundle::default()
