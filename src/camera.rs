@@ -45,7 +45,7 @@ pub fn camera_follow_sys(
     let rocket_entity = rocket_entity.0;
     let rocket_kinematics = kinematics.get(rocket_entity).unwrap();
 
-    // TODO: Make bobbing work in both directions
     camera_res.camera.target = rocket_kinematics.pos;
-    camera_res.camera.target.y += get_time().sin() as f32 * camera_res.screen_size.y / 50.0;
+    // TODO: Camera bobbing
+    // camera_res.camera.target.y += (get_time() / 60.0).sin() as f32 * camera_res.screen_size.y / 50.0;
 }
