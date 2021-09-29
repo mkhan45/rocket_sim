@@ -1,7 +1,7 @@
 use crate::physics::Kinematics;
 
 use bevy_ecs::prelude::{IntoSystem, Stage};
-use bevy_ecs::schedule::{Schedule, SystemStage};
+use bevy_ecs::schedule::{ParallelSystemDescriptorCoercion, Schedule, SystemStage};
 use bevy_ecs::world::World;
 
 use egui_macroquad::macroquad::prelude::*;
@@ -31,19 +31,16 @@ impl MainState {
         schedule.add_stage_after(
             "physics",
             "integrate",
-            SystemStage::single_threaded().with_system(physics::integration_sys.system()),
-        );
-        schedule.add_stage_after(
-            "integrate",
-            "cleanup",
-            SystemStage::single_threaded().with_system(physics::reset_accel_sys.system()),
+            SystemStage::single_threaded()
+                .with_system(physics::integration_sys.system().label("integrate"))
+                .with_system(physics::reset_accel_sys.system().after("integrate")),
         );
         schedule.add_stage_after(
             "integrate",
             "camera",
             SystemStage::single_threaded()
-                .with_system(camera::update_camera_sys.system())
-                .with_system(camera::camera_follow_sys.system()),
+                .with_system(camera::camera_follow_sys.system().label("follow"))
+                .with_system(camera::update_camera_sys.system().after("follow")),
         );
 
         let rocket = world
@@ -69,7 +66,6 @@ impl MainState {
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
         crate::rocket::draw_rocket(&kinematics.pos);
-        // draw_rectangle(kinematics.pos.x, kinematics.pos.y, 10.0, 10.0, WHITE);
 
         Ok(())
     }

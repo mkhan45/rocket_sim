@@ -24,8 +24,8 @@ async fn main() -> Result<(), GameError> {
     let mut main_state = main_state::MainState::new();
 
     loop {
-        main_state.draw()?;
         main_state.update()?;
+        main_state.draw()?;
         main_state.draw_ui()?;
 
         next_frame().await
