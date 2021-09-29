@@ -36,9 +36,14 @@ impl MainState {
         schedule.add_stage_after(
             "integrate",
             "cleanup",
+            SystemStage::single_threaded().with_system(physics::reset_accel_sys.system()),
+        );
+        schedule.add_stage_after(
+            "integrate",
+            "camera",
             SystemStage::single_threaded()
-                .with_system(physics::reset_accel_sys.system())
-                .with_system(camera::update_camera_sys.system()),
+                .with_system(camera::update_camera_sys.system())
+                .with_system(camera::camera_follow_sys.system()),
         );
 
         let rocket = world

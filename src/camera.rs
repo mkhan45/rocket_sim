@@ -1,7 +1,7 @@
+use crate::physics::Kinematics;
+use crate::rocket::RocketEntity;
 use bevy_ecs::prelude::*;
-use egui_macroquad::macroquad::prelude::{
-    screen_height, screen_width, set_camera, Camera2D, Rect, Vec2,
-};
+use egui_macroquad::macroquad::prelude::*;
 
 pub struct CameraRes {
     pub camera: Camera2D,
@@ -35,4 +35,17 @@ pub fn update_camera_sys(mut camera_res: ResMut<CameraRes>) {
     camera_res.camera.zoom.x = camera_res.camera.zoom.y / aspect_ratio;
 
     set_camera(&camera_res.camera);
+}
+
+pub fn camera_follow_sys(
+    mut camera_res: ResMut<CameraRes>,
+    rocket_entity: Res<RocketEntity>,
+    kinematics: Query<&Kinematics>,
+) {
+    let rocket_entity = rocket_entity.0;
+    let rocket_kinematics = kinematics.get(rocket_entity).unwrap();
+
+    // TODO: Make bobbing work in both directions
+    camera_res.camera.target = rocket_kinematics.pos;
+    camera_res.camera.target.y += get_time().sin() as f32 * camera_res.screen_size.y / 50.0;
 }

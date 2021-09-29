@@ -12,8 +12,8 @@ pub mod camera;
 
 pub mod ui;
 
-pub const SCREEN_WIDTH: f32 = 1000.0;
-pub const SCREEN_HEIGHT: f32 = 1000.0;
+pub const SCREEN_WIDTH: f32 = 500.0;
+pub const SCREEN_HEIGHT: f32 = 500.0;
 
 pub const THRUST_MULTIPLIER: f32 = 75.0;
 pub const GRAVITY: f32 = 200.0;

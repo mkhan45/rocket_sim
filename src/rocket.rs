@@ -24,10 +24,10 @@ pub struct Rocket {
 impl Default for Rocket {
     fn default() -> Self {
         Rocket {
-            fuel_capacity: 900.0,
-            current_fuel_mass: 900.0,
-            non_fuel_mass: 800.0,
-            fuel_burn_rate: 250.0,
+            fuel_capacity: 1500.0,
+            current_fuel_mass: 1500.0,
+            non_fuel_mass: 100.0,
+            fuel_burn_rate: 350.0,
             fuel_thrust_factor: 2500.0,
         }
     }
