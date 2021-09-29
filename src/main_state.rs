@@ -45,7 +45,7 @@ impl MainState {
             .spawn()
             .insert_bundle(RocketBundle {
                 kinematics: Kinematics {
-                    pos: Vec2::new(0.0, crate::SCREEN_HEIGHT * 0.8),
+                    pos: Vec2::new(0.0, 0.0),
                     ..Kinematics::default()
                 },
                 ..RocketBundle::default()
@@ -63,7 +63,8 @@ impl MainState {
 
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-        draw_rectangle(kinematics.pos.x, kinematics.pos.y, 10.0, 10.0, WHITE);
+        crate::rocket::draw_rocket(&kinematics.pos);
+        // draw_rectangle(kinematics.pos.x, kinematics.pos.y, 10.0, 10.0, WHITE);
 
         Ok(())
     }

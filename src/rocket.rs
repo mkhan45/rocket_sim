@@ -1,4 +1,5 @@
 use bevy_ecs::prelude::Bundle;
+use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::Kinematics;
 
@@ -36,4 +37,35 @@ impl Rocket {
     pub fn total_mass(&self) -> f32 {
         self.current_fuel_mass + self.non_fuel_mass
     }
+}
+
+pub fn draw_rocket(pos: &Vec2) {
+    // body
+    draw_rectangle(pos.x, pos.y, 5.0, 10.0, WHITE);
+    // window
+    draw_circle(pos.x + 2.5, pos.y + 3.5, 2.0, SKYBLUE);
+
+    // top
+    draw_triangle(
+        Vec2::new(pos.x + 6.5, pos.y),
+        Vec2::new(pos.x - 1.5, pos.y),
+        Vec2::new(pos.x + 2.5, pos.y - 5.0),
+        RED,
+    );
+
+    // left fin
+    draw_triangle(
+        Vec2::new(pos.x + 5.0, pos.y + 10.0),
+        Vec2::new(pos.x + 5.0, pos.y + 5.0),
+        Vec2::new(pos.x + 7.0, pos.y + 10.0),
+        RED,
+    );
+
+    // right fin
+    draw_triangle(
+        Vec2::new(pos.x, pos.y + 10.0),
+        Vec2::new(pos.x, pos.y + 5.0),
+        Vec2::new(pos.x - 2.0, pos.y + 10.0),
+        RED,
+    );
 }

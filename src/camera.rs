@@ -12,7 +12,7 @@ impl Default for CameraRes {
     fn default() -> Self {
         let display_rect = Rect::new(
             -crate::SCREEN_WIDTH / 2.0,
-            0.0,
+            -crate::SCREEN_HEIGHT,
             crate::SCREEN_WIDTH,
             crate::SCREEN_HEIGHT,
         );
