@@ -3,10 +3,22 @@ use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::Kinematics;
 
-#[derive(Bundle, Default)]
+#[derive(Bundle)]
 pub struct RocketBundle {
     pub kinematics: Kinematics,
     pub rocket: Rocket,
+}
+
+impl Default for RocketBundle {
+    fn default() -> Self {
+        RocketBundle {
+            kinematics: Kinematics {
+                pos: Vec2::new(0.0, -6015.0),
+                ..Kinematics::default()
+            },
+            rocket: Rocket::default(),
+        }
+    }
 }
 
 pub struct RocketEntity(pub bevy_ecs::entity::Entity);
@@ -26,9 +38,9 @@ impl Default for Rocket {
         Rocket {
             fuel_capacity: 1500.0,
             current_fuel_mass: 1500.0,
-            non_fuel_mass: 100.0,
-            fuel_burn_rate: 350.0,
-            fuel_thrust_factor: 2500.0,
+            non_fuel_mass: 120.0,
+            fuel_burn_rate: 150.0,
+            fuel_thrust_factor: 4000.0,
         }
     }
 }

@@ -27,7 +27,7 @@ impl MainState {
             "physics",
             SystemStage::single_threaded()
                 .with_system(physics::rocket_thrust_sys.system())
-                .with_system(physics::rocket_gravity_sys.system()),
+                .with_system(physics::rocket_planet_interaction_sys.system()),
         );
         schedule.add_stage_after(
             "physics",
@@ -44,30 +44,34 @@ impl MainState {
                 .with_system(camera::update_camera_sys.system().after("follow")),
         );
 
-        let rocket = world
-            .spawn()
-            .insert_bundle(RocketBundle {
-                kinematics: Kinematics {
-                    pos: Vec2::new(0.0, 0.0),
-                    ..Kinematics::default()
-                },
-                ..RocketBundle::default()
-            })
-            .id();
+        let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
         world.insert_resource(RocketEntity(rocket));
 
         world.insert_resource(crate::camera::CameraRes::default());
 
+        crate::planet::add_planets(&mut world);
+
         MainState { world, schedule }
     }
 
-    pub fn draw(&self) -> Result<(), GameError> {
+    pub fn draw(&mut self) -> Result<(), GameError> {
         clear_background(BLACK);
 
-        let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
-        let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-        let rocket = self.world.get::<Rocket>(*rocket_entity).unwrap();
-        crate::rocket::draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
+        {
+            use crate::planet::CelestialBody;
+
+            let mut planet_query = self.world.query::<(&CelestialBody, &Kinematics)>();
+            for (planet, kinematics) in planet_query.iter(&self.world) {
+                crate::planet::draw_planet(planet, kinematics);
+            }
+        }
+
+        {
+            let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
+            let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
+            let rocket = self.world.get::<Rocket>(*rocket_entity).unwrap();
+            crate::rocket::draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
+        }
 
         Ok(())
     }

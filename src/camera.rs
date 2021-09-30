@@ -48,8 +48,10 @@ pub fn camera_follow_sys(
     camera_res.camera.target = rocket_kinematics.pos;
 
     let t = get_time();
-    let x_offset = (t.cos() + (t * 1.7).cos() + (t / 3.5).cos() + (t - 2.0).sin() + (t / 2.1).sin()) as f32;
-    let y_offset = (t.sin() + (t * 1.5).sin() + (t / 3.1).sin() + (t + 1.0).cos() + (t / 1.5).cos()) as f32;
+    let x_offset =
+        (t.cos() + (t * 1.7).cos() + (t / 3.5).cos() + (t - 2.0).sin() + (t / 2.1).sin()) as f32;
+    let y_offset =
+        (t.sin() + (t * 1.5).sin() + (t / 3.1).sin() + (t + 1.0).cos() + (t / 1.5).cos()) as f32;
     camera_res.camera.target.x += x_offset * camera_res.screen_size.x / 250.0;
     camera_res.camera.target.y += y_offset * camera_res.screen_size.y / 250.0;
 }
