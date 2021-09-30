@@ -12,6 +12,8 @@ use egui_macroquad::egui::Rect as EguiRect;
 use egui_macroquad::egui::Vec2 as EguiVec;
 use egui_macroquad::macroquad::prelude::{screen_height, screen_width, Rect};
 
+use crate::graphs::SpeedGraph;
+
 fn _to_egui_rect(rect: &Rect) -> EguiRect {
     EguiRect::from_two_pos(
         Pos2::new(rect.x, rect.y),
@@ -46,6 +48,15 @@ impl MainState {
                 ))
                 .show(egui_ctx, |ui| {
                     self.time_speed_slider(ui);
+                });
+
+            egui::Window::new("Graphs")
+                .default_rect(EguiRect::from_min_size(
+                    Pos2::new(0.0, 2.0 * screen_height() / 10.0 + 50.0),
+                    EguiVec::new(150.0, 150.0),
+                ))
+                .show(egui_ctx, |ui| {
+                    self.draw_graphs(ui);
                 });
         });
 
@@ -89,5 +100,18 @@ impl MainState {
             ui.label("Sim Speed:");
             ui.add(egui::Slider::new(&mut steps.0, 0..=10));
         });
+    }
+
+    fn draw_graphs(&mut self, ui: &mut egui::Ui) {
+        use egui::plot::{Line, Plot, Value, Values};
+
+        let rocket_entity = self.world.get_resource::<RocketEntity>().unwrap().0;
+        let mut speed_graphs = self.world.query::<&SpeedGraph>();
+        let speed_graph = &speed_graphs.get(&self.world, rocket_entity).unwrap().0;
+        ui.add(
+            Plot::new("velocity").line(Line::new(Values::from_values_iter(
+                speed_graph.iter().enumerate().map(|(i, y)| Value::new(i as f64, *y as f64)),
+            ))),
+        );
     }
 }

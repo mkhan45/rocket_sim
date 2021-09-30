@@ -3,10 +3,13 @@ use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::Kinematics;
 
+use crate::graphs::SpeedGraph;
+
 #[derive(Bundle)]
 pub struct RocketBundle {
     pub kinematics: Kinematics,
     pub rocket: Rocket,
+    pub speed_graph: SpeedGraph,
 }
 
 impl Default for RocketBundle {
@@ -17,6 +20,7 @@ impl Default for RocketBundle {
                 ..Kinematics::default()
             },
             rocket: Rocket::default(),
+            speed_graph: SpeedGraph(Vec::new()),
         }
     }
 }

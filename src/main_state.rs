@@ -6,6 +6,7 @@ use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::{self, DT};
 use crate::rocket::{RocketBundle, RocketEntity};
+use crate::graphs;
 use crate::GameError;
 
 use crate::camera;
@@ -34,7 +35,8 @@ impl MainState {
             "integrate",
             SystemStage::single_threaded()
                 .with_system(physics::integration_sys.system().label("integrate"))
-                .with_system(physics::reset_accel_sys.system().after("integrate")),
+                .with_system(physics::reset_accel_sys.system().after("integrate"))
+                .with_system(graphs::rocket_graph_sys.system().after("integrate")),
         );
 
         let mut frame_schedule = Schedule::default();

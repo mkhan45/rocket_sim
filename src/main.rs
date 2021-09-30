@@ -14,6 +14,8 @@ pub mod ui;
 
 pub mod planet;
 
+pub mod graphs;
+
 pub const SCREEN_WIDTH: f32 = 250.0;
 pub const SCREEN_HEIGHT: f32 = 250.0;
 
