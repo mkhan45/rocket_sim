@@ -1,6 +1,3 @@
-use crate::physics::Kinematics;
-use crate::rocket::Rocket;
-
 use bevy_ecs::prelude::{IntoSystem, Stage};
 use bevy_ecs::schedule::{ParallelSystemDescriptorCoercion, Schedule, SystemStage};
 use bevy_ecs::world::World;
@@ -17,6 +14,7 @@ pub struct MainState {
     pub world: World,
     frame_schedule: Schedule,
     fixed_schedule: Schedule,
+    draw_schedule: Schedule,
     leftover_time: f32,
 }
 
@@ -47,6 +45,14 @@ impl MainState {
                 .with_system(camera::update_camera_sys.system().after("follow")),
         );
 
+        let mut draw_schedule = Schedule::default();
+        draw_schedule.add_stage(
+            "draw",
+            SystemStage::single_threaded()
+                .with_system(crate::planet::draw_planet_sys.system().label("planets"))
+                .with_system(crate::rocket::draw_rocket_sys.system().after("planets")),
+        );
+
         let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
         world.insert_resource(RocketEntity(rocket));
 
@@ -56,36 +62,29 @@ impl MainState {
 
         crate::planet::add_planets(&mut world);
 
-        MainState { world, frame_schedule, fixed_schedule, leftover_time: 0.0 }
+        MainState {
+            world,
+            frame_schedule,
+            fixed_schedule,
+            draw_schedule,
+            leftover_time: 0.0,
+        }
     }
 
     pub fn draw(&mut self) -> Result<(), GameError> {
         clear_background(BLACK);
-
-        {
-            use crate::planet::CelestialBody;
-
-            let mut planet_query = self.world.query::<(&CelestialBody, &Kinematics)>();
-            for (planet, kinematics) in planet_query.iter(&self.world) {
-                crate::planet::draw_planet(planet, kinematics);
-            }
-        }
-
-        {
-            let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
-            let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-            let rocket = self.world.get::<Rocket>(*rocket_entity).unwrap();
-            crate::rocket::draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
-        }
-
+        self.draw_schedule.run(&mut self.world);
         Ok(())
     }
 
     pub fn update(&mut self) -> Result<(), GameError> {
-
         {
             let dt = self.world.get_resource::<DT>().unwrap().0;
-            let steps = self.world.get_resource::<crate::physics::Steps>().unwrap().0;
+            let steps = self
+                .world
+                .get_resource::<crate::physics::Steps>()
+                .unwrap()
+                .0;
             let target_dt = steps as f32 / 60.0 + self.leftover_time;
             let mut acc_time = 0.0;
             while acc_time < target_dt {

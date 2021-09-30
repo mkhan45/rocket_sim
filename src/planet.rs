@@ -23,7 +23,7 @@ pub fn add_planets(world: &mut World) {
         .insert(Kinematics::default());
 }
 
-pub fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
+fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
     const ATM_INCRS: usize = 10;
 
     let atmosphere_color_vec = planet.atmosphere_color.to_vec();
@@ -49,4 +49,10 @@ pub fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
         0.0,
         GREEN,
     );
+}
+
+pub fn draw_planet_sys(query: Query<(&CelestialBody, &Kinematics)>) {
+    for (planet, kinematics) in query.iter() {
+        draw_planet(planet, kinematics);
+    }
 }

@@ -21,7 +21,6 @@ fn _to_egui_rect(rect: &Rect) -> EguiRect {
 
 impl MainState {
     pub fn draw_ui(&mut self) -> Result<(), GameError> {
-
         egui_macroquad::ui(|egui_ctx| {
             use egui::{FontDefinitions, TextStyle};
             let mut fonts = FontDefinitions::default();
@@ -34,7 +33,8 @@ impl MainState {
                     EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
                 ))
                 .show(egui_ctx, |ui| {
-                    let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
+                    let RocketEntity(rocket_entity) =
+                        self.world.get_resource::<RocketEntity>().unwrap();
                     self.fuel_bar(rocket_entity, ui);
                     self.rocket_info(rocket_entity, ui);
                 });
@@ -81,7 +81,10 @@ impl MainState {
 
     fn time_speed_slider(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            let mut steps = self.world.get_resource_mut::<crate::physics::Steps>().unwrap();
+            let mut steps = self
+                .world
+                .get_resource_mut::<crate::physics::Steps>()
+                .unwrap();
 
             ui.label("Sim Speed:");
             ui.add(egui::Slider::new(&mut steps.0, 0..=10));

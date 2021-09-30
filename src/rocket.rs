@@ -1,4 +1,4 @@
-use bevy_ecs::prelude::Bundle;
+use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::Kinematics;
@@ -88,5 +88,11 @@ pub fn draw_rocket(pos: &Vec2, thrust: bool) {
             Vec2::new(pos.x + 2.5, pos.y + 15.0),
             ORANGE,
         )
+    }
+}
+
+pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics)>) {
+    for (rocket, kinematics) in query.iter() {
+        draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
     }
 }
