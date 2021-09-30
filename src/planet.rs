@@ -24,16 +24,17 @@ pub fn add_planets(world: &mut World) {
 }
 
 pub fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
+    const ATM_INCRS: usize = 10;
+
     let atmosphere_color_vec = planet.atmosphere_color.to_vec();
-    let atmosphere_color_incr = atmosphere_color_vec / 5.0;
+    let atmosphere_color_incr = atmosphere_color_vec / ATM_INCRS as f32;
+    let atmosphere_radius_incr = (planet.atmosphere_radius - planet.radius) / ATM_INCRS as f32;
 
-    let atmosphere_radius_incr = (planet.atmosphere_radius - planet.radius) / 5.0;
-
-    for i in 1..5 {
+    for i in (1..ATM_INCRS).rev() {
         draw_poly(
             kinematics.pos.x,
             kinematics.pos.y,
-            250,
+            50,
             planet.radius + atmosphere_radius_incr * i as f32,
             0.0,
             Color::from_vec(atmosphere_color_vec - atmosphere_color_incr * (i - 1) as f32),

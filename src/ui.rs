@@ -21,7 +21,6 @@ fn _to_egui_rect(rect: &Rect) -> EguiRect {
 
 impl MainState {
     pub fn draw_ui(&mut self) -> Result<(), GameError> {
-        let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
 
         egui_macroquad::ui(|egui_ctx| {
             use egui::{FontDefinitions, TextStyle};
@@ -35,8 +34,18 @@ impl MainState {
                     EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
                 ))
                 .show(egui_ctx, |ui| {
+                    let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
                     self.fuel_bar(rocket_entity, ui);
                     self.rocket_info(rocket_entity, ui);
+                });
+
+            egui::Window::new("Sim")
+                .default_rect(EguiRect::from_min_size(
+                    Pos2::new(0.0, screen_height() / 10.0 + 50.0),
+                    EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
+                ))
+                .show(egui_ctx, |ui| {
+                    self.time_speed_slider(ui);
                 });
         });
 
@@ -68,5 +77,10 @@ impl MainState {
         ));
 
         ui.label(format!("Altitude: {:.2}", -kinematics.pos.y));
+    }
+
+    fn time_speed_slider(&mut self, ui: &mut egui::Ui) {
+        let mut steps = self.world.get_resource_mut::<crate::physics::Steps>().unwrap();
+        ui.add(egui::Slider::new(&mut steps.0, 0..=10));
     }
 }

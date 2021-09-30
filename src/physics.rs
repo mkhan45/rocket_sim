@@ -5,6 +5,7 @@ use egui_macroquad::macroquad::prelude::Vec2;
 use crate::planet::CelestialBody;
 
 pub struct DT(pub f32);
+pub struct Steps(pub usize);
 pub struct Mass(pub f32);
 
 #[derive(Default)]
@@ -49,9 +50,7 @@ pub fn rocket_planet_interaction_sys(
     dt: Res<DT>,
 ) {
     use crate::GRAVITY as G;
-    let damping_eqn = |x: f32| {
-        0.666 + x.sqrt() / 3.0
-    };
+    let damping_eqn = |x: f32| 0.666 + x.sqrt() / 3.0;
 
     let dt = dt.0;
 
@@ -80,7 +79,12 @@ pub fn rocket_planet_interaction_sys(
     }
 
     let rocket_mut_query = query_set.q1_mut();
-    for (((mut rocket_kinematics, _), g_accel), atm_damping) in rocket_mut_query.iter_mut().zip(rocket_accels.iter()).zip(rocket_dampings.iter()) {
+    for (((mut rocket_kinematics, _), g_accel), atm_damping) in rocket_mut_query
+        .iter_mut()
+        .zip(rocket_accels.iter())
+        .zip(rocket_dampings.iter())
+    {
+        // TODO: Make damping frame rate independent
         rocket_kinematics.acc -= *g_accel;
         rocket_kinematics.vel *= (*atm_damping).powf(dt);
     }

@@ -48,6 +48,7 @@ impl MainState {
         world.insert_resource(RocketEntity(rocket));
 
         world.insert_resource(crate::camera::CameraRes::default());
+        world.insert_resource(crate::physics::Steps(1));
 
         crate::planet::add_planets(&mut world);
 
@@ -78,7 +79,10 @@ impl MainState {
 
     pub fn update(&mut self) -> Result<(), GameError> {
         self.world.insert_resource(DT(get_frame_time()));
-        self.schedule.run(&mut self.world);
+        let steps = self.world.get_resource::<crate::physics::Steps>().unwrap();
+        for _ in 0..steps.0 {
+            self.schedule.run(&mut self.world);
+        }
         Ok(())
     }
 }
