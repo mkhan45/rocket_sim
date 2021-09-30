@@ -20,7 +20,7 @@ impl Default for RocketBundle {
                 ..Kinematics::default()
             },
             rocket: Rocket::default(),
-            speed_graph: SpeedGraph(Vec::new()),
+            speed_graph: SpeedGraph(std::collections::VecDeque::new()),
         }
     }
 }

@@ -50,10 +50,10 @@ impl MainState {
                     self.time_speed_slider(ui);
                 });
 
-            egui::Window::new("Graphs")
+            egui::Window::new("Speed")
                 .default_rect(EguiRect::from_min_size(
                     Pos2::new(0.0, 2.0 * screen_height() / 10.0 + 50.0),
-                    EguiVec::new(150.0, 150.0),
+                    EguiVec::new(250.0, 250.0),
                 ))
                 .show(egui_ctx, |ui| {
                     self.draw_graphs(ui);
@@ -98,7 +98,7 @@ impl MainState {
                 .unwrap();
 
             ui.label("Sim Speed:");
-            ui.add(egui::Slider::new(&mut steps.0, 0..=10));
+            ui.add(egui::Slider::new(&mut steps.0, 0..=100));
         });
     }
 
