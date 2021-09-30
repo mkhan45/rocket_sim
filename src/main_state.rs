@@ -1,4 +1,5 @@
 use crate::physics::Kinematics;
+use crate::rocket::Rocket;
 
 use bevy_ecs::prelude::{IntoSystem, Stage};
 use bevy_ecs::schedule::{ParallelSystemDescriptorCoercion, Schedule, SystemStage};
@@ -65,7 +66,8 @@ impl MainState {
 
         let RocketEntity(rocket_entity) = self.world.get_resource::<RocketEntity>().unwrap();
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
-        crate::rocket::draw_rocket(&kinematics.pos);
+        let rocket = self.world.get::<Rocket>(*rocket_entity).unwrap();
+        crate::rocket::draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
 
         Ok(())
     }

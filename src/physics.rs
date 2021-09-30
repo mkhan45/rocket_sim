@@ -3,7 +3,6 @@ use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::Vec2;
 
 pub struct DT(pub f32);
-
 pub struct Mass(pub f32);
 
 #[derive(Default)]

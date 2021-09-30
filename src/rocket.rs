@@ -39,7 +39,7 @@ impl Rocket {
     }
 }
 
-pub fn draw_rocket(pos: &Vec2) {
+pub fn draw_rocket(pos: &Vec2, thrust: bool) {
     // body
     draw_rectangle(pos.x, pos.y, 5.0, 10.0, WHITE);
     // window
@@ -68,4 +68,13 @@ pub fn draw_rocket(pos: &Vec2) {
         Vec2::new(pos.x - 2.0, pos.y + 10.0),
         RED,
     );
+
+    if thrust {
+        draw_triangle(
+            Vec2::new(pos.x + 5.0, pos.y + 10.0),
+            Vec2::new(pos.x, pos.y + 10.0),
+            Vec2::new(pos.x + 2.5, pos.y + 15.0),
+            ORANGE,
+        )
+    }
 }
