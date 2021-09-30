@@ -50,7 +50,7 @@ pub fn rocket_planet_interaction_sys(
     dt: Res<DT>,
 ) {
     use crate::GRAVITY as G;
-    let damping_eqn = |x: f32| 0.666 + x.sqrt() / 3.0;
+    let damping_eqn = |x: f32| 0.5 + x.sqrt() / 2.0;
 
     let dt = dt.0;
 
@@ -84,7 +84,6 @@ pub fn rocket_planet_interaction_sys(
         .zip(rocket_accels.iter())
         .zip(rocket_dampings.iter())
     {
-        // TODO: Make damping frame rate independent
         rocket_kinematics.acc -= *g_accel;
         rocket_kinematics.vel *= (*atm_damping).powf(dt);
     }

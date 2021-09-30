@@ -17,7 +17,7 @@ pub mod planet;
 pub const SCREEN_WIDTH: f32 = 250.0;
 pub const SCREEN_HEIGHT: f32 = 250.0;
 
-pub const THRUST_MULTIPLIER: f32 = 150.0;
+pub const THRUST_MULTIPLIER: f32 = 100.0;
 pub const GRAVITY: f32 = 15.0;
 
 #[macroquad::main("Rocket")]

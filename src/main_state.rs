@@ -15,29 +15,32 @@ use crate::camera;
 
 pub struct MainState {
     pub world: World,
-    schedule: Schedule,
+    frame_schedule: Schedule,
+    fixed_schedule: Schedule,
+    leftover_time: f32,
 }
 
 impl MainState {
     pub fn new() -> Self {
         let mut world = World::new();
 
-        let mut schedule = Schedule::default();
-        schedule.add_stage(
+        let mut fixed_schedule = Schedule::default();
+        fixed_schedule.add_stage(
             "physics",
             SystemStage::single_threaded()
                 .with_system(physics::rocket_thrust_sys.system())
                 .with_system(physics::rocket_planet_interaction_sys.system()),
         );
-        schedule.add_stage_after(
+        fixed_schedule.add_stage_after(
             "physics",
             "integrate",
             SystemStage::single_threaded()
                 .with_system(physics::integration_sys.system().label("integrate"))
                 .with_system(physics::reset_accel_sys.system().after("integrate")),
         );
-        schedule.add_stage_after(
-            "integrate",
+
+        let mut frame_schedule = Schedule::default();
+        frame_schedule.add_stage(
             "camera",
             SystemStage::single_threaded()
                 .with_system(camera::camera_follow_sys.system().label("follow"))
@@ -49,10 +52,11 @@ impl MainState {
 
         world.insert_resource(crate::camera::CameraRes::default());
         world.insert_resource(crate::physics::Steps(1));
+        world.insert_resource(DT(1.0 / 60.0));
 
         crate::planet::add_planets(&mut world);
 
-        MainState { world, schedule }
+        MainState { world, frame_schedule, fixed_schedule, leftover_time: 0.0 }
     }
 
     pub fn draw(&mut self) -> Result<(), GameError> {
@@ -78,11 +82,20 @@ impl MainState {
     }
 
     pub fn update(&mut self) -> Result<(), GameError> {
-        self.world.insert_resource(DT(get_frame_time()));
-        let steps = self.world.get_resource::<crate::physics::Steps>().unwrap();
-        for _ in 0..steps.0 {
-            self.schedule.run(&mut self.world);
+
+        {
+            let dt = self.world.get_resource::<DT>().unwrap().0;
+            let steps = self.world.get_resource::<crate::physics::Steps>().unwrap().0;
+            let target_dt = steps as f32 / 60.0 + self.leftover_time;
+            let mut acc_time = 0.0;
+            while acc_time < target_dt {
+                self.fixed_schedule.run(&mut self.world);
+                acc_time += dt;
+            }
+            self.leftover_time = acc_time - target_dt;
         }
+
+        self.frame_schedule.run(&mut self.world);
         Ok(())
     }
 }

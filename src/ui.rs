@@ -39,7 +39,7 @@ impl MainState {
                     self.rocket_info(rocket_entity, ui);
                 });
 
-            egui::Window::new("Sim")
+            egui::Window::new("Simulation")
                 .default_rect(EguiRect::from_min_size(
                     Pos2::new(0.0, screen_height() / 10.0 + 50.0),
                     EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
@@ -80,7 +80,11 @@ impl MainState {
     }
 
     fn time_speed_slider(&mut self, ui: &mut egui::Ui) {
-        let mut steps = self.world.get_resource_mut::<crate::physics::Steps>().unwrap();
-        ui.add(egui::Slider::new(&mut steps.0, 0..=10));
+        ui.horizontal(|ui| {
+            let mut steps = self.world.get_resource_mut::<crate::physics::Steps>().unwrap();
+
+            ui.label("Sim Speed:");
+            ui.add(egui::Slider::new(&mut steps.0, 0..=10));
+        });
     }
 }
