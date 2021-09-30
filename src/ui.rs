@@ -110,7 +110,10 @@ impl MainState {
         let speed_graph = &speed_graphs.get(&self.world, rocket_entity).unwrap().0;
         ui.add(
             Plot::new("velocity").line(Line::new(Values::from_values_iter(
-                speed_graph.iter().enumerate().map(|(i, y)| Value::new(i as f64, *y as f64)),
+                speed_graph
+                    .iter()
+                    .enumerate()
+                    .map(|(i, y)| Value::new(i as f64, *y as f64)),
             ))),
         );
     }

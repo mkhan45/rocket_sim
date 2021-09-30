@@ -24,22 +24,13 @@ pub fn add_planets(world: &mut World) {
 }
 
 fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
-    const ATM_INCRS: usize = 10;
-
-    let atmosphere_color_vec = planet.atmosphere_color.to_vec();
-    let atmosphere_color_incr = atmosphere_color_vec / ATM_INCRS as f32;
-    let atmosphere_radius_incr = (planet.atmosphere_radius - planet.radius) / ATM_INCRS as f32;
-
-    for i in (1..ATM_INCRS).rev() {
-        draw_poly(
-            kinematics.pos.x,
-            kinematics.pos.y,
-            50,
-            planet.radius + atmosphere_radius_incr * i as f32,
-            0.0,
-            Color::from_vec(atmosphere_color_vec - atmosphere_color_incr * (i - 1) as f32),
-        );
-    }
+    draw_radial_gradient(
+        kinematics.pos.x,
+        kinematics.pos.y,
+        planet.atmosphere_radius,
+        planet.atmosphere_color,
+        BLACK,
+    );
 
     draw_poly(
         kinematics.pos.x,
@@ -54,5 +45,40 @@ fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
 pub fn draw_planet_sys(query: Query<(&CelestialBody, &Kinematics)>) {
     for (planet, kinematics) in query.iter() {
         draw_planet(planet, kinematics);
+    }
+}
+
+fn draw_radial_gradient(x: f32, y: f32, radius: f32, center: Color, edges: Color) {
+    // Modified draw_poly()
+    // https://github.com/not-fl3/macroquad/blob/432d383f35dbec9cd726acfa84d850c44d39e0c1/src/shapes.rs#L87-L111
+    //
+    // Advised by PSteinhaus
+
+    let sides = 250;
+    let rotation = 0.0f32;
+
+    let mut vertices = Vec::<Vertex>::with_capacity(sides as usize + 2);
+    let mut indices = Vec::<u16>::with_capacity(sides as usize * 3);
+
+    let rot = rotation.to_radians();
+    vertices.push(Vertex::new(x, y, 0., 0., 0., center));
+    for i in 0..sides + 1 {
+        let rx = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).cos();
+        let ry = (i as f32 / sides as f32 * std::f32::consts::PI * 2. + rot).sin();
+
+        let vertex = Vertex::new(x + radius * rx, y + radius * ry, 0., rx, ry, edges);
+
+        vertices.push(vertex);
+
+        if i != sides {
+            indices.extend_from_slice(&[0, i as u16 + 1, i as u16 + 2]);
+        }
+    }
+
+    unsafe {
+        let gl = egui_macroquad::macroquad::window::get_internal_gl().quad_gl;
+        gl.texture(None);
+        gl.draw_mode(DrawMode::Triangles);
+        gl.geometry(&vertices, &indices);
     }
 }

@@ -4,9 +4,9 @@ use bevy_ecs::world::World;
 
 use egui_macroquad::macroquad::prelude::*;
 
+use crate::graphs;
 use crate::physics::{self, DT};
 use crate::rocket::{RocketBundle, RocketEntity};
-use crate::graphs;
 use crate::GameError;
 
 use crate::camera;
