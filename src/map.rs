@@ -58,7 +58,7 @@ pub fn draw_map_sys(
         );
 
         for (planet, kinematics) in planet_query.iter() {
-            const CAMERA_SCALE: f32 = 1.0 / 1000.0;
+            const CAMERA_SCALE: f32 = 1.0 / 2000.0;
 
             let camera_pos = camera_res.camera.target;
             let mut offset = camera_pos - kinematics.pos;

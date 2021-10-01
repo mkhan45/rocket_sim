@@ -18,7 +18,7 @@ pub const SCREEN_WIDTH: f32 = 250.0;
 pub const SCREEN_HEIGHT: f32 = 250.0;
 
 pub const THRUST_MULTIPLIER: f32 = 90.0;
-pub const GRAVITY: f32 = 1100.0;
+pub const GRAVITY: f32 = 1350.0;
 
 #[macroquad::main("Rocket")]
 async fn main() -> Result<(), GameError> {

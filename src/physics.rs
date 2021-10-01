@@ -30,7 +30,7 @@ pub fn integration_sys(mut query: Query<&mut Kinematics>, dt: Res<DT>) {
 pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: Res<DT>) {
     let rockets = query
         .iter_mut()
-        .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0);
+        .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0 && rocket.thrust);
     for (mut kinematics, mut rocket) in rockets {
         let mass = rocket.total_mass();
         let fuel_burned = rocket.fuel_burn_rate * dt.0;
@@ -76,8 +76,9 @@ pub fn rocket_planet_interaction_sys(
                 rocket_accels.push(a_g * r.normalize());
                 if atmosphere_proportion < 1.0 {
                     let atmosphere_damping = damping_eqn(atmosphere_proportion);
-
                     rocket_dampings.push(atmosphere_damping);
+                } else {
+                    rocket_dampings.push(1.0);
                 }
             } else {
                 rocket_crashed.0 = true;

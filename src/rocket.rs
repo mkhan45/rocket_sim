@@ -42,17 +42,19 @@ pub struct Rocket {
     /// how much force per fuel unit
     pub fuel_thrust_factor: f32,
     pub angle: f32,
+    pub thrust: bool,
 }
 
 impl Default for Rocket {
     fn default() -> Self {
         Rocket {
-            fuel_capacity: 1650.0,
-            current_fuel_mass: 1650.0,
+            fuel_capacity: 1750.0,
+            current_fuel_mass: 1750.0,
             non_fuel_mass: 100.0,
             fuel_burn_rate: 25.0,
             fuel_thrust_factor: 10_000.0,
             angle: 0.0,
+            thrust: true,
         }
     }
 }
@@ -133,7 +135,7 @@ pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics)>, textures: Res<Textu
         draw_rocket(
             &kinematics.pos,
             rocket.angle,
-            rocket.current_fuel_mass > 0.0,
+            rocket.current_fuel_mass > 0.0 && rocket.thrust,
             &textures,
         );
     }
@@ -149,6 +151,12 @@ pub fn rocket_input_sys(mut query: Query<&mut Rocket>, dt: Res<crate::physics::D
     if is_key_down(KeyCode::D) {
         for mut rocket in query.iter_mut() {
             rocket.angle -= 0.75 * dt.0;
+        }
+    }
+
+    if is_key_pressed(KeyCode::Space) {
+        for mut rocket in query.iter_mut() {
+            rocket.thrust = !rocket.thrust;
         }
     }
 }

@@ -91,7 +91,7 @@ impl MainState {
                 .unwrap();
 
             ui.label("Sim Speed:");
-            ui.add(egui::Slider::new(&mut steps.0, 0..=100));
+            ui.add(egui::Slider::new(&mut steps.0, 1..=100));
         });
     }
 
