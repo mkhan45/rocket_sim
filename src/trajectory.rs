@@ -41,7 +41,7 @@ pub fn trajectory_calculation_sys(
 
     unsafe {
         for (mut kinematics, mut trajectory, rocket) in rocket_mut_query.iter_unsafe() {
-            trajectory.valid = !main_rocket.thrust;
+            trajectory.valid = main_rocket.thrust == 0.0;
             if !trajectory.valid {
                 *kinematics = *main_rocket_kinematics;
                 trajectory.points.clear();
@@ -52,15 +52,15 @@ pub fn trajectory_calculation_sys(
             }
 
             let start_time = get_time();
-            let max_time = 0.05;
+            let max_time = 0.005;
 
-            let mut iterations = 0;
-            let max_iterations = 750;
+            // let mut iterations = 0;
+            // let max_iterations = 750;
             while trajectory.points.len() < trajectory.max_len
-                && iterations < max_iterations
+                //&& iterations < max_iterations
                 && (get_time() - start_time) < max_time
             {
-                iterations += 1;
+                // iterations += 1;
                 let mut total_accel = Vec2::new(0.0, 0.0);
                 let mut total_damping = 1.0;
 

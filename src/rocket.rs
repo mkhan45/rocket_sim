@@ -43,7 +43,8 @@ pub struct Rocket {
     /// how much force per fuel unit
     pub fuel_thrust_factor: f32,
     pub angle: f32,
-    pub thrust: bool,
+    // from 0 to 1
+    pub thrust: f32,
 }
 
 impl Default for Rocket {
@@ -55,7 +56,7 @@ impl Default for Rocket {
             fuel_burn_rate: 10.0,
             fuel_thrust_factor: 2_150.0,
             angle: 0.0,
-            thrust: true,
+            thrust: 1.0,
         }
     }
 }
@@ -139,7 +140,7 @@ pub fn draw_rocket_sys(
         draw_rocket(
             &kinematics.pos,
             rocket.angle,
-            rocket.current_fuel_mass > 0.0 && rocket.thrust,
+            rocket.current_fuel_mass > 0.0 && rocket.thrust > 0.0,
             &textures,
         );
     }
@@ -158,9 +159,17 @@ pub fn rocket_input_sys(mut query: Query<&mut Rocket>, dt: Res<crate::physics::D
         }
     }
 
-    if is_key_pressed(KeyCode::Space) {
+    if is_key_down(KeyCode::Space) || is_key_down(KeyCode::C) {
         for mut rocket in query.iter_mut() {
-            rocket.thrust = !rocket.thrust;
+            rocket.thrust += 0.1 * dt.0;
+            rocket.thrust = rocket.thrust.min(1.0);
+        }
+    }
+
+    if is_key_down(KeyCode::Z) {
+        for mut rocket in query.iter_mut() {
+            rocket.thrust -= 0.1 * dt.0;
+            rocket.thrust = rocket.thrust.max(0.0);
         }
     }
 }

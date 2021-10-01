@@ -36,6 +36,7 @@ impl MainState {
                     let RocketEntity(rocket_entity) =
                         self.world.get_resource::<RocketEntity>().unwrap();
                     self.fuel_bar(rocket_entity, ui);
+                    self.throttle_bar(rocket_entity, ui);
                     self.rocket_info(rocket_entity, ui);
 
                     ui.add_space(5.0);
@@ -68,6 +69,16 @@ impl MainState {
                 egui::ProgressBar::new(fuel_used_proportion)
                     .text(format!("Remaining: {:.2}", rocket.current_fuel_mass)),
             );
+        });
+    }
+
+    fn throttle_bar(&self, rocket_entity: &Entity, ui: &mut egui::Ui) {
+        let rocket = self.world.get::<Rocket>(*rocket_entity).unwrap();
+        let thrust = rocket.thrust;
+
+        ui.horizontal(|ui| {
+            ui.label("Throttle: ");
+            ui.add(egui::ProgressBar::new(thrust));
         });
     }
 

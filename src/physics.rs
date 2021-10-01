@@ -34,10 +34,10 @@ pub fn rocket_thrust_sys(
 ) {
     let rockets = query
         .iter_mut()
-        .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0 && rocket.thrust);
+        .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0 && rocket.thrust > 0.0);
     for (mut kinematics, mut rocket) in rockets {
         let mass = rocket.total_mass();
-        let fuel_burned = rocket.fuel_burn_rate * dt.0;
+        let fuel_burned = rocket.fuel_burn_rate * dt.0 * rocket.thrust;
         let thrust_force = fuel_burned * rocket.fuel_thrust_factor;
         let thrust_accel = thrust_force / mass * crate::THRUST_MULTIPLIER;
         kinematics.acc -= thrust_accel * Vec2::new(rocket.angle.sin(), rocket.angle.cos());
