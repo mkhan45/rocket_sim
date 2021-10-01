@@ -67,7 +67,8 @@ impl MainState {
                         .system()
                         .label("map")
                         .after("rocket"),
-                ),
+                )
+                .with_system(draw_crashed_text_sys.system().label("crashed").after("map")),
         );
 
         let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
@@ -78,6 +79,7 @@ impl MainState {
         world.insert_resource(DT(1.0 / 60.0));
         world.insert_resource(crate::map::MapRes::default());
         world.insert_resource(crate::texture::Textures::default());
+        world.insert_resource(crate::rocket::RocketCrashed(false));
 
         crate::planet::add_planets(&mut world);
 
@@ -97,6 +99,11 @@ impl MainState {
     }
 
     pub fn update(&mut self) -> Result<(), GameError> {
+        if !self
+            .world
+            .get_resource::<crate::rocket::RocketCrashed>()
+            .unwrap()
+            .0
         {
             let dt = self.world.get_resource::<DT>().unwrap().0;
             let steps = self
@@ -115,5 +122,27 @@ impl MainState {
 
         self.frame_schedule.run(&mut self.world);
         Ok(())
+    }
+}
+
+pub fn draw_crashed_text_sys(
+    rocket_crashed: bevy_ecs::prelude::Res<crate::rocket::RocketCrashed>,
+    camera_res: bevy_ecs::prelude::Res<crate::camera::CameraRes>,
+) {
+    if rocket_crashed.0 {
+        draw_text(
+            "CRASHED",
+            camera_res.camera.target.x - crate::SCREEN_WIDTH / 5.0,
+            camera_res.camera.target.y,
+            36.0,
+            RED,
+        );
+        draw_text(
+            "Reload to restart",
+            camera_res.camera.target.x - crate::SCREEN_WIDTH / 3.0,
+            camera_res.camera.target.y + 30.0,
+            24.0,
+            RED,
+        );
     }
 }

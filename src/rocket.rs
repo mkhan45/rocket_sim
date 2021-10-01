@@ -4,6 +4,7 @@ use egui_macroquad::macroquad::prelude::*;
 use crate::physics::Kinematics;
 
 use crate::graphs::SpeedGraph;
+pub struct RocketCrashed(pub bool);
 
 #[derive(Bundle)]
 pub struct RocketBundle {

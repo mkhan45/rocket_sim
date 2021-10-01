@@ -1,5 +1,5 @@
 use crate::physics::Kinematics;
-use crate::texture::{Textures, TextureName};
+use crate::texture::{TextureName, Textures};
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 

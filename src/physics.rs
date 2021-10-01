@@ -3,6 +3,7 @@ use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::Vec2;
 
 use crate::planet::CelestialBody;
+use crate::rocket::RocketCrashed;
 
 pub struct DT(pub f32);
 pub struct Steps(pub usize);
@@ -49,6 +50,7 @@ pub fn rocket_planet_interaction_sys(
         Query<(&CelestialBody, &Kinematics)>,
     )>,
     dt: Res<DT>,
+    mut rocket_crashed: ResMut<RocketCrashed>,
 ) {
     use crate::GRAVITY as G;
     let damping_eqn = |x: f32| 0.5 + x.sqrt() / 2.0;
@@ -64,17 +66,21 @@ pub fn rocket_planet_interaction_sys(
     for (planet, planet_kinematics) in planet_query.iter() {
         for (rocket_kinematics, rocket) in rocket_immut_query.iter() {
             let r = rocket_kinematics.pos - planet_kinematics.pos;
-            let _m1 = rocket.total_mass();
-            let m2 = planet.mass;
+            if r.length() > planet.radius {
+                let _m1 = rocket.total_mass();
+                let m2 = planet.mass;
 
-            let a_g = G * m2 / r.length_squared();
+                let a_g = G * m2 / r.length_squared();
 
-            let atmosphere_proportion = r.length() / planet.atmosphere_radius;
-            if atmosphere_proportion < 1.0 {
-                let atmosphere_damping = damping_eqn(atmosphere_proportion);
+                let atmosphere_proportion = r.length() / planet.atmosphere_radius;
+                if atmosphere_proportion < 1.0 {
+                    let atmosphere_damping = damping_eqn(atmosphere_proportion);
 
-                rocket_accels.push(a_g * r.normalize());
-                rocket_dampings.push(atmosphere_damping);
+                    rocket_accels.push(a_g * r.normalize());
+                    rocket_dampings.push(atmosphere_damping);
+                }
+            } else {
+                rocket_crashed.0 = true;
             }
         }
     }
