@@ -6,6 +6,8 @@ use crate::physics::Kinematics;
 use crate::graphs::SpeedGraph;
 pub struct RocketCrashed(pub bool);
 
+use crate::texture::{TextureName, Textures};
+
 #[derive(Bundle)]
 pub struct RocketBundle {
     pub kinematics: Kinematics,
@@ -36,6 +38,7 @@ pub struct Rocket {
     pub fuel_burn_rate: f32,
     /// how much force per fuel unit
     pub fuel_thrust_factor: f32,
+    pub angle: f32,
 }
 
 impl Default for Rocket {
@@ -46,6 +49,7 @@ impl Default for Rocket {
             non_fuel_mass: 120.0,
             fuel_burn_rate: 150.0,
             fuel_thrust_factor: 4000.0,
+            angle: 0.0,
         }
     }
 }
@@ -56,48 +60,79 @@ impl Rocket {
     }
 }
 
-pub fn draw_rocket(pos: &Vec2, thrust: bool) {
-    // body
-    draw_rectangle(pos.x, pos.y, 5.0, 10.0, WHITE);
-    // window
-    draw_circle(pos.x + 2.5, pos.y + 3.5, 2.0, SKYBLUE);
+pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures) {
+    // // body
+    // draw_rectangle(pos.x, pos.y, 5.0, 10.0, WHITE);
+    // // window
+    // draw_circle(pos.x + 2.5, pos.y + 3.5, 2.0, SKYBLUE);
 
-    // top
-    draw_triangle(
-        Vec2::new(pos.x + 6.5, pos.y),
-        Vec2::new(pos.x - 1.5, pos.y),
-        Vec2::new(pos.x + 2.5, pos.y - 5.0),
-        RED,
-    );
+    // // top
+    // draw_triangle(
+    //     Vec2::new(pos.x + 6.5, pos.y),
+    //     Vec2::new(pos.x - 1.5, pos.y),
+    //     Vec2::new(pos.x + 2.5, pos.y - 5.0),
+    //     RED,
+    // );
 
-    // left fin
-    draw_triangle(
-        Vec2::new(pos.x + 5.0, pos.y + 10.0),
-        Vec2::new(pos.x + 5.0, pos.y + 5.0),
-        Vec2::new(pos.x + 7.0, pos.y + 10.0),
-        RED,
-    );
+    // // left fin
+    // draw_triangle(
+    //     Vec2::new(pos.x + 5.0, pos.y + 10.0),
+    //     Vec2::new(pos.x + 5.0, pos.y + 5.0),
+    //     Vec2::new(pos.x + 7.0, pos.y + 10.0),
+    //     RED,
+    // );
 
-    // right fin
-    draw_triangle(
-        Vec2::new(pos.x, pos.y + 10.0),
-        Vec2::new(pos.x, pos.y + 5.0),
-        Vec2::new(pos.x - 2.0, pos.y + 10.0),
-        RED,
+    // // right fin
+    // draw_triangle(
+    //     Vec2::new(pos.x, pos.y + 10.0),
+    //     Vec2::new(pos.x, pos.y + 5.0),
+    //     Vec2::new(pos.x - 2.0, pos.y + 10.0),
+    //     RED,
+    // );
+
+    draw_texture_ex(
+        textures[TextureName::Rocket],
+        pos.x -5.0,
+        pos.y - 10.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(Vec2::new(10.0, 20.0)),
+            rotation: angle,
+            ..DrawTextureParams::default()
+        },
     );
 
     if thrust {
         draw_triangle(
-            Vec2::new(pos.x + 5.0, pos.y + 10.0),
-            Vec2::new(pos.x, pos.y + 10.0),
-            Vec2::new(pos.x + 2.5, pos.y + 15.0),
+            Vec2::new(pos.x - 2.5, pos.y + 7.75),
+            Vec2::new(pos.x + 2.5, pos.y + 7.75),
+            Vec2::new(pos.x, pos.y + 15.0),
             ORANGE,
         )
     }
 }
 
-pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics)>) {
+pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics)>, textures: Res<Textures>) {
     for (rocket, kinematics) in query.iter() {
-        draw_rocket(&kinematics.pos, rocket.current_fuel_mass > 0.0);
+        draw_rocket(
+            &kinematics.pos,
+            rocket.angle,
+            rocket.current_fuel_mass > 0.0,
+            &textures,
+        );
+    }
+}
+
+pub fn rocket_input_sys(mut query: Query<&mut Rocket>, dt: Res<crate::physics::DT>) {
+    if is_key_down(KeyCode::A) {
+        for mut rocket in query.iter_mut() {
+            rocket.angle += 0.75 * dt.0;
+        }
+    }
+
+    if is_key_down(KeyCode::D) {
+        for mut rocket in query.iter_mut() {
+            rocket.angle -= 0.75 * dt.0;
+        }
     }
 }

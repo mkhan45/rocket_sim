@@ -48,7 +48,9 @@ impl MainState {
         );
         frame_schedule.add_stage(
             "input",
-            SystemStage::single_threaded().with_system(crate::map::map_input_sys.system()),
+            SystemStage::single_threaded()
+                .with_system(crate::map::map_input_sys.system())
+                .with_system(crate::rocket::rocket_input_sys.system()),
         );
 
         let mut draw_schedule = Schedule::default();
