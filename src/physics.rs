@@ -73,10 +73,10 @@ pub fn rocket_planet_interaction_sys(
                 let a_g = G * m2 / r.length_squared();
 
                 let atmosphere_proportion = r.length() / planet.atmosphere_radius;
+                rocket_accels.push(a_g * r.normalize());
                 if atmosphere_proportion < 1.0 {
                     let atmosphere_damping = damping_eqn(atmosphere_proportion);
 
-                    rocket_accels.push(a_g * r.normalize());
                     rocket_dampings.push(atmosphere_damping);
                 }
             } else {

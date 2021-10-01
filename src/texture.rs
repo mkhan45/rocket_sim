@@ -5,6 +5,7 @@ use std::collections::HashMap;
 pub enum TextureName {
     Earth,
     Rocket,
+    RocketBoost,
 }
 
 pub struct Textures(HashMap<TextureName, Texture2D>);
@@ -24,6 +25,14 @@ impl Default for Textures {
             TextureName::Rocket,
             Texture2D::from_file_with_format(
                 include_bytes!("../textures/rocket.png"),
+                Some(ImageFormat::Png),
+            ),
+        );
+
+        map.insert(
+            TextureName::RocketBoost,
+            Texture2D::from_file_with_format(
+                include_bytes!("../textures/rocket_boost.png"),
                 Some(ImageFormat::Png),
             ),
         );

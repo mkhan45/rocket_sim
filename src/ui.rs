@@ -13,6 +13,7 @@ use egui_macroquad::egui::Rect as EguiRect;
 use egui_macroquad::macroquad::prelude::Rect;
 
 use crate::graphs::SpeedGraph;
+use crate::rocket::Altitude;
 
 fn _to_egui_rect(rect: &Rect) -> EguiRect {
     EguiRect::from_two_pos(
@@ -72,13 +73,14 @@ impl MainState {
 
     fn rocket_info(&self, rocket_entity: &Entity, ui: &mut egui::Ui) {
         let kinematics = self.world.get::<Kinematics>(*rocket_entity).unwrap();
+        let altitude = self.world.get::<Altitude>(*rocket_entity).unwrap();
 
         ui.label(format!(
             "Velocity: <{:.2}, {:.2}>",
             kinematics.vel.x, -kinematics.vel.y
         ));
 
-        ui.label(format!("Altitude: {:.2}", -kinematics.pos.y));
+        ui.label(format!("Altitude: {:.2}", altitude.0));
     }
 
     fn time_speed_slider(&mut self, ui: &mut egui::Ui) {

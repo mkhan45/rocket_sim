@@ -2,6 +2,7 @@ use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
 use crate::physics::Kinematics;
+use crate::planet::CelestialBody;
 
 use crate::graphs::SpeedGraph;
 pub struct RocketCrashed(pub bool);
@@ -13,6 +14,7 @@ pub struct RocketBundle {
     pub kinematics: Kinematics,
     pub rocket: Rocket,
     pub speed_graph: SpeedGraph,
+    pub altitude: Altitude,
 }
 
 impl Default for RocketBundle {
@@ -24,6 +26,7 @@ impl Default for RocketBundle {
             },
             rocket: Rocket::default(),
             speed_graph: SpeedGraph(std::collections::VecDeque::new()),
+            altitude: Altitude(std::f32::MAX),
         }
     }
 }
@@ -44,11 +47,11 @@ pub struct Rocket {
 impl Default for Rocket {
     fn default() -> Self {
         Rocket {
-            fuel_capacity: 1500.0,
-            current_fuel_mass: 1500.0,
-            non_fuel_mass: 120.0,
-            fuel_burn_rate: 150.0,
-            fuel_thrust_factor: 4000.0,
+            fuel_capacity: 1650.0,
+            current_fuel_mass: 1650.0,
+            non_fuel_mass: 100.0,
+            fuel_burn_rate: 25.0,
+            fuel_thrust_factor: 10_000.0,
             angle: 0.0,
         }
     }
@@ -57,6 +60,22 @@ impl Default for Rocket {
 impl Rocket {
     pub fn total_mass(&self) -> f32 {
         self.current_fuel_mass + self.non_fuel_mass
+    }
+}
+
+pub struct Altitude(pub f32);
+
+pub fn update_altitude_sys(
+    mut rocket_query: Query<(&mut Altitude, &Kinematics, &Rocket)>,
+    planet_query: Query<(&Kinematics, &CelestialBody)>,
+) {
+    for (mut altitude, rocket_kinematics, _) in rocket_query.iter_mut() {
+        altitude.0 = std::f32::MAX;
+        for (planet_kinematics, planet) in planet_query.iter() {
+            altitude.0 = altitude
+                .0
+                .min((rocket_kinematics.pos - planet_kinematics.pos).length() - planet.radius);
+        }
     }
 }
 
@@ -90,26 +109,23 @@ pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures) {
     //     RED,
     // );
 
+    let (texture, height) = if thrust {
+        (TextureName::RocketBoost, 24.0)
+    } else {
+        (TextureName::Rocket, 20.0)
+    };
+
     draw_texture_ex(
-        textures[TextureName::Rocket],
-        pos.x -5.0,
-        pos.y - 10.0,
+        textures[texture],
+        pos.x - 5.0,
+        pos.y - height / 2.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(Vec2::new(10.0, 20.0)),
+            dest_size: Some(Vec2::new(10.0, height)),
             rotation: angle,
             ..DrawTextureParams::default()
         },
     );
-
-    if thrust {
-        draw_triangle(
-            Vec2::new(pos.x - 2.5, pos.y + 7.75),
-            Vec2::new(pos.x + 2.5, pos.y + 7.75),
-            Vec2::new(pos.x, pos.y + 15.0),
-            ORANGE,
-        )
-    }
 }
 
 pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics)>, textures: Res<Textures>) {
