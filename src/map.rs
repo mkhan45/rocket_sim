@@ -3,6 +3,7 @@ use egui_macroquad::macroquad::prelude::*;
 use crate::camera::CameraRes;
 use crate::physics::Kinematics;
 use crate::planet::CelestialBody;
+use crate::texture::Textures;
 
 use bevy_ecs::prelude::*;
 
@@ -26,6 +27,7 @@ pub fn draw_map_sys(
     map_res: ResMut<MapRes>,
     camera_res: Res<CameraRes>,
     planet_query: Query<(&CelestialBody, &Kinematics)>,
+    textures: Res<Textures>,
 ) {
     if map_res.shown {
         let width = crate::SCREEN_WIDTH * 0.8;
@@ -55,15 +57,28 @@ pub fn draw_map_sys(
             RED,
         );
 
-        for (_, kinematics) in planet_query.iter() {
+        for (planet, kinematics) in planet_query.iter() {
+            const CAMERA_SCALE: f32 = 1.0 / 1000.0;
+
             let camera_pos = camera_res.camera.target;
-            let offset = camera_pos - kinematics.pos;
-            let pos = offset / 1000.0 + camera_pos;
+            let mut offset = camera_pos - kinematics.pos;
+            offset.y *= -1.0;
+            let pos = offset * CAMERA_SCALE + camera_pos;
 
             if ((camera_pos.x - width / 2.0)..(camera_pos.x + height / 2.0)).contains(&pos.x)
                 && ((camera_pos.y - height / 2.0)..(camera_pos.y + height / 2.0)).contains(&pos.y)
             {
-                draw_circle(pos.x, pos.y, 1.0, WHITE);
+                let size = planet.radius * 2.0 * CAMERA_SCALE;
+                draw_texture_ex(
+                    textures[planet.texture],
+                    pos.x - size / 2.0,
+                    pos.y - size / 2.0,
+                    WHITE,
+                    DrawTextureParams {
+                        dest_size: Some(Vec2::new(size, size)),
+                        ..DrawTextureParams::default()
+                    },
+                );
             }
         }
     }

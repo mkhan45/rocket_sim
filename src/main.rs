@@ -4,19 +4,15 @@ use macroquad::prelude::*;
 pub mod error;
 use error::GameError;
 
-pub mod main_state;
-pub mod physics;
-pub mod rocket;
-
 pub mod camera;
-
-pub mod ui;
-
-pub mod planet;
-
 pub mod graphs;
-
+pub mod main_state;
 pub mod map;
+pub mod physics;
+pub mod planet;
+pub mod rocket;
+pub mod texture;
+pub mod ui;
 
 pub const SCREEN_WIDTH: f32 = 250.0;
 pub const SCREEN_HEIGHT: f32 = 250.0;

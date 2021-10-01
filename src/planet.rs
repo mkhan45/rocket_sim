@@ -1,4 +1,5 @@
 use crate::physics::Kinematics;
+use crate::texture::{Textures, TextureName};
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
@@ -7,8 +8,7 @@ pub struct CelestialBody {
     pub mass: f32,
     pub atmosphere_radius: f32,
     pub atmosphere_color: Color,
-    // TODO
-    // pub texture: idk,
+    pub texture: TextureName,
 }
 
 pub fn add_planets(world: &mut World) {
@@ -19,11 +19,12 @@ pub fn add_planets(world: &mut World) {
             mass: 600_000.0,
             atmosphere_radius: 100_000.0,
             atmosphere_color: SKYBLUE,
+            texture: TextureName::Earth,
         })
         .insert(Kinematics::default());
 }
 
-fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
+fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics, textures: &Textures) {
     draw_radial_gradient(
         kinematics.pos.x,
         kinematics.pos.y,
@@ -32,19 +33,22 @@ fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics) {
         BLACK,
     );
 
-    draw_poly(
-        kinematics.pos.x,
-        kinematics.pos.y,
-        150,
-        planet.radius,
-        0.0,
-        GREEN,
+    let size = planet.radius * 2.0;
+    draw_texture_ex(
+        textures[planet.texture],
+        kinematics.pos.x - size / 2.0,
+        kinematics.pos.y - size / 2.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(Vec2::new(size, size)),
+            ..DrawTextureParams::default()
+        },
     );
 }
 
-pub fn draw_planet_sys(query: Query<(&CelestialBody, &Kinematics)>) {
+pub fn draw_planet_sys(query: Query<(&CelestialBody, &Kinematics)>, textures: Res<Textures>) {
     for (planet, kinematics) in query.iter() {
-        draw_planet(planet, kinematics);
+        draw_planet(planet, kinematics, &textures);
     }
 }
 

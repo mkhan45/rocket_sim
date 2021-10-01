@@ -29,7 +29,8 @@ impl MainState {
             fonts.family_and_size.get_mut(&TextStyle::Body).unwrap().1 = 24.0;
             egui_ctx.set_fonts(fonts);
 
-            egui::Window::new("").id(egui::Id::new("Main"))
+            egui::Window::new("")
+                .id(egui::Id::new("Main"))
                 .show(egui_ctx, |ui| {
                     let RocketEntity(rocket_entity) =
                         self.world.get_resource::<RocketEntity>().unwrap();

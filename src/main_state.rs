@@ -77,6 +77,7 @@ impl MainState {
         world.insert_resource(crate::physics::Steps(1));
         world.insert_resource(DT(1.0 / 60.0));
         world.insert_resource(crate::map::MapRes::default());
+        world.insert_resource(crate::texture::Textures::default());
 
         crate::planet::add_planets(&mut world);
 
