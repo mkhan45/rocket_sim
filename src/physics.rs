@@ -28,7 +28,10 @@ pub fn integration_sys(mut query: Query<&mut Kinematics, Without<Trajectory>>, d
     }
 }
 
-pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket), Without<Trajectory>>, dt: Res<DT>) {
+pub fn rocket_thrust_sys(
+    mut query: Query<(&mut Kinematics, &mut Rocket), Without<Trajectory>>,
+    dt: Res<DT>,
+) {
     let rockets = query
         .iter_mut()
         .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0 && rocket.thrust);
@@ -89,12 +92,14 @@ pub fn rocket_planet_interaction_sys(
     let mut rocket_dampings: Vec<f32> = vec![];
 
     for planet_info @ (planet, planet_kinematics) in planet_query.iter() {
-        for rocket_info @ (rocket_kinematics, _) in rocket_immut_query.iter() {
+        for (i, rocket_info @ (rocket_kinematics, _)) in rocket_immut_query.iter().enumerate() {
+            rocket_accels.push(Vec2::new(0.0, 0.0));
+            rocket_dampings.push(1.0);
             let r = rocket_kinematics.pos - planet_kinematics.pos;
             if r.length() > planet.radius {
                 let (accel, damping) = calculate_planet_interaction(rocket_info, planet_info);
-                rocket_accels.push(accel);
-                rocket_dampings.push(damping);
+                rocket_accels[i] += accel;
+                rocket_dampings[i] *= damping;
             } else {
                 rocket_crashed.0 = true;
             }

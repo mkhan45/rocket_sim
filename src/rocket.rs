@@ -131,7 +131,10 @@ pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures) {
     );
 }
 
-pub fn draw_rocket_sys(query: Query<(&Rocket, &Kinematics), Without<Trajectory>>, textures: Res<Textures>) {
+pub fn draw_rocket_sys(
+    query: Query<(&Rocket, &Kinematics), Without<Trajectory>>,
+    textures: Res<Textures>,
+) {
     for (rocket, kinematics) in query.iter() {
         draw_rocket(
             &kinematics.pos,

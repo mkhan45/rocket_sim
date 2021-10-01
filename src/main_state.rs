@@ -28,7 +28,7 @@ impl MainState {
             "physics",
             SystemStage::single_threaded()
                 .with_system(physics::rocket_thrust_sys.system())
-                .with_system(physics::rocket_planet_interaction_sys.system())
+                .with_system(physics::rocket_planet_interaction_sys.system()),
         );
         fixed_schedule.add_stage_after(
             "physics",
@@ -78,7 +78,11 @@ impl MainState {
         let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
         world.insert_resource(RocketEntity(rocket));
 
-        world.spawn().insert_bundle(RocketBundle::default()).insert(crate::trajectory::Trajectory::new(6000 * 60)).id();
+        world
+            .spawn()
+            .insert_bundle(RocketBundle::default())
+            .insert(crate::trajectory::Trajectory::new(5000 * 60))
+            .id();
 
         world.insert_resource(crate::camera::CameraRes::default());
         world.insert_resource(crate::physics::Steps(1));

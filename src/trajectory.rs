@@ -3,11 +3,11 @@ use std::collections::VecDeque;
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
-use crate::physics::{Kinematics, calculate_planet_interaction, DT};
+use crate::physics::{calculate_planet_interaction, Kinematics, DT};
 use crate::planet::CelestialBody;
 use crate::rocket::{Rocket, RocketEntity};
 
-pub struct Trajectory{
+pub struct Trajectory {
     pub points: VecDeque<Vec2>,
     pub max_len: usize,
     pub valid: bool,
@@ -51,24 +51,30 @@ pub fn trajectory_calculation_sys(
                 trajectory.points.pop_front();
             }
 
-            let mut rocket_accels = vec![];
-            let mut rocket_dampings = vec![];
+            let start_time = get_time();
+            let max_time = 0.05;
+
             let mut iterations = 0;
-            let max_iterations = 250;
-            while trajectory.points.len() < trajectory.max_len && iterations < max_iterations {
+            let max_iterations = 750;
+            while trajectory.points.len() < trajectory.max_len
+                && iterations < max_iterations
+                && (get_time() - start_time) < max_time
+            {
                 iterations += 1;
-                for planet_info@(planet, planet_kinematics) in planet_query.iter() {
+                let mut total_accel = Vec2::new(0.0, 0.0);
+                let mut total_damping = 1.0;
+
+                for planet_info @ (planet, planet_kinematics) in planet_query.iter() {
                     if (kinematics.pos - planet_kinematics.pos).length() > planet.radius {
-                        let (accel, damping) = calculate_planet_interaction((&kinematics, rocket), planet_info);
-                        rocket_accels.push(accel);
-                        rocket_dampings.push(damping);
+                        let (accel, damping) =
+                            calculate_planet_interaction((&kinematics, rocket), planet_info);
+                        total_accel += accel;
+                        total_damping *= damping;
                     }
                 }
 
-                for (accel, damping) in rocket_accels.iter().zip(rocket_dampings.iter()) {
-                    kinematics.acc -= *accel;
-                    kinematics.vel *= damping.powf(dt / max_iterations as f32);
-                }
+                kinematics.acc -= total_accel;
+                kinematics.vel *= total_damping.powf(dt);
 
                 let vel = kinematics.vel;
                 let accel = kinematics.acc;
