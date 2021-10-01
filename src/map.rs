@@ -84,7 +84,7 @@ pub fn draw_map_sys(
             }
         }
 
-        for trajectory in trajectory_query.iter().filter(|t| t.valid) {
+        for trajectory in trajectory_query.iter()/* .filter(|t| t.valid) */ {
             let fst_iter = trajectory.points.iter();
             let snd_iter = trajectory.points.iter().skip(1);
 

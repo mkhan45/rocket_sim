@@ -67,7 +67,7 @@ pub fn trajectory_calculation_sys(
 
                 for (accel, damping) in rocket_accels.iter().zip(rocket_dampings.iter()) {
                     kinematics.acc -= *accel;
-                    kinematics.vel *= damping.powf(dt);
+                    kinematics.vel *= damping.powf(dt / max_iterations as f32);
                 }
 
                 let vel = kinematics.vel;
