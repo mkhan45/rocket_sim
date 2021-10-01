@@ -4,19 +4,20 @@ use egui_macroquad::macroquad::prelude::Vec2;
 
 use crate::planet::CelestialBody;
 use crate::rocket::RocketCrashed;
+use crate::trajectory::Trajectory;
 
 pub struct DT(pub f32);
 pub struct Steps(pub usize);
 pub struct Mass(pub f32);
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct Kinematics {
     pub pos: Vec2,
     pub vel: Vec2,
     pub acc: Vec2,
 }
 
-pub fn integration_sys(mut query: Query<&mut Kinematics>, dt: Res<DT>) {
+pub fn integration_sys(mut query: Query<&mut Kinematics, Without<Trajectory>>, dt: Res<DT>) {
     for mut kinematics in query.iter_mut() {
         let dt = dt.0;
         let vel = kinematics.vel;
@@ -27,7 +28,7 @@ pub fn integration_sys(mut query: Query<&mut Kinematics>, dt: Res<DT>) {
     }
 }
 
-pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: Res<DT>) {
+pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket), Without<Trajectory>>, dt: Res<DT>) {
     let rockets = query
         .iter_mut()
         .filter(|(_, rocket)| rocket.current_fuel_mass > 0.0 && rocket.thrust);
@@ -43,18 +44,42 @@ pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: R
     }
 }
 
+pub fn calculate_planet_interaction(
+    (rocket_kinematics, rocket): (&Kinematics, &Rocket),
+    (planet, planet_kinematics): (&CelestialBody, &Kinematics),
+) -> (Vec2, f32) {
+    use crate::GRAVITY as G;
+    let damping_eqn = |x: f32| 0.5 + x.sqrt() / 2.0;
+
+    let r = rocket_kinematics.pos - planet_kinematics.pos;
+    assert!(r.length() > planet.radius);
+
+    let _m1 = rocket.total_mass();
+    let m2 = planet.mass;
+
+    let a_g = G * m2 / r.length_squared();
+
+    let atmosphere_proportion = r.length() / planet.atmosphere_radius;
+    let g_accel = a_g * r.normalize();
+
+    let damping = if atmosphere_proportion < 1.0 {
+        damping_eqn(atmosphere_proportion)
+    } else {
+        1.0
+    };
+
+    (g_accel, damping)
+}
+
 pub fn rocket_planet_interaction_sys(
     mut query_set: QuerySet<(
-        Query<(&Kinematics, &Rocket)>,
-        Query<(&mut Kinematics, &Rocket)>,
+        Query<(&Kinematics, &Rocket), Without<Trajectory>>,
+        Query<(&mut Kinematics, &Rocket), Without<Trajectory>>,
         Query<(&CelestialBody, &Kinematics)>,
     )>,
     dt: Res<DT>,
     mut rocket_crashed: ResMut<RocketCrashed>,
 ) {
-    use crate::GRAVITY as G;
-    let damping_eqn = |x: f32| 0.5 + x.sqrt() / 2.0;
-
     let dt = dt.0;
 
     let rocket_immut_query = query_set.q0();
@@ -63,23 +88,13 @@ pub fn rocket_planet_interaction_sys(
     let mut rocket_accels: Vec<Vec2> = vec![];
     let mut rocket_dampings: Vec<f32> = vec![];
 
-    for (planet, planet_kinematics) in planet_query.iter() {
-        for (rocket_kinematics, rocket) in rocket_immut_query.iter() {
+    for planet_info @ (planet, planet_kinematics) in planet_query.iter() {
+        for rocket_info @ (rocket_kinematics, _) in rocket_immut_query.iter() {
             let r = rocket_kinematics.pos - planet_kinematics.pos;
             if r.length() > planet.radius {
-                let _m1 = rocket.total_mass();
-                let m2 = planet.mass;
-
-                let a_g = G * m2 / r.length_squared();
-
-                let atmosphere_proportion = r.length() / planet.atmosphere_radius;
-                rocket_accels.push(a_g * r.normalize());
-                if atmosphere_proportion < 1.0 {
-                    let atmosphere_damping = damping_eqn(atmosphere_proportion);
-                    rocket_dampings.push(atmosphere_damping);
-                } else {
-                    rocket_dampings.push(1.0);
-                }
+                let (accel, damping) = calculate_planet_interaction(rocket_info, planet_info);
+                rocket_accels.push(accel);
+                rocket_dampings.push(damping);
             } else {
                 rocket_crashed.0 = true;
             }

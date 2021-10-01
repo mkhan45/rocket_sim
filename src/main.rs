@@ -12,6 +12,7 @@ pub mod physics;
 pub mod planet;
 pub mod rocket;
 pub mod texture;
+pub mod trajectory;
 pub mod ui;
 
 pub const SCREEN_WIDTH: f32 = 250.0;
