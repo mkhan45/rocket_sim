@@ -34,7 +34,8 @@ pub fn rocket_thrust_sys(mut query: Query<(&mut Kinematics, &mut Rocket)>, dt: R
         let mass = rocket.total_mass();
         let fuel_burned = rocket.fuel_burn_rate * dt.0;
         let thrust_force = fuel_burned * rocket.fuel_thrust_factor;
-        kinematics.acc -= Vec2::new(0.0, thrust_force / mass * crate::THRUST_MULTIPLIER);
+        let thrust_accel = thrust_force / mass * crate::THRUST_MULTIPLIER;
+        kinematics.acc -= thrust_accel * Vec2::new(0.0, 1.0);
 
         rocket.current_fuel_mass -= fuel_burned;
         rocket.current_fuel_mass = rocket.current_fuel_mass.max(0.0);

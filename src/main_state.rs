@@ -46,13 +46,28 @@ impl MainState {
                 .with_system(camera::camera_follow_sys.system().label("follow"))
                 .with_system(camera::update_camera_sys.system().after("follow")),
         );
+        frame_schedule.add_stage(
+            "input",
+            SystemStage::single_threaded().with_system(crate::map::map_input_sys.system()),
+        );
 
         let mut draw_schedule = Schedule::default();
         draw_schedule.add_stage(
             "draw",
             SystemStage::single_threaded()
                 .with_system(crate::planet::draw_planet_sys.system().label("planets"))
-                .with_system(crate::rocket::draw_rocket_sys.system().after("planets")),
+                .with_system(
+                    crate::rocket::draw_rocket_sys
+                        .system()
+                        .label("rocket")
+                        .after("planets"),
+                )
+                .with_system(
+                    crate::map::draw_map_sys
+                        .system()
+                        .label("map")
+                        .after("rocket"),
+                ),
         );
 
         let rocket = world.spawn().insert_bundle(RocketBundle::default()).id();
@@ -61,6 +76,7 @@ impl MainState {
         world.insert_resource(crate::camera::CameraRes::default());
         world.insert_resource(crate::physics::Steps(1));
         world.insert_resource(DT(1.0 / 60.0));
+        world.insert_resource(crate::map::MapRes::default());
 
         crate::planet::add_planets(&mut world);
 
