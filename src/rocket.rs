@@ -52,8 +52,8 @@ impl Default for Rocket {
             fuel_capacity: 1750.0,
             current_fuel_mass: 1750.0,
             non_fuel_mass: 100.0,
-            fuel_burn_rate: 25.0,
-            fuel_thrust_factor: 10_000.0,
+            fuel_burn_rate: 10.0,
+            fuel_thrust_factor: 2_150.0,
             angle: 0.0,
             thrust: true,
         }
