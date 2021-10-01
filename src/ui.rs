@@ -9,8 +9,8 @@ use bevy_ecs::entity::Entity;
 
 use egui_macroquad::egui::Pos2;
 use egui_macroquad::egui::Rect as EguiRect;
-use egui_macroquad::egui::Vec2 as EguiVec;
-use egui_macroquad::macroquad::prelude::{screen_height, screen_width, Rect};
+// use egui_macroquad::egui::Vec2 as EguiVec;
+use egui_macroquad::macroquad::prelude::Rect;
 
 use crate::graphs::SpeedGraph;
 
@@ -29,33 +29,23 @@ impl MainState {
             fonts.family_and_size.get_mut(&TextStyle::Body).unwrap().1 = 24.0;
             egui_ctx.set_fonts(fonts);
 
-            egui::Window::new("Rocket")
-                .fixed_rect(EguiRect::from_min_size(
-                    Pos2::new(0.0, 0.0),
-                    EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
-                ))
+            egui::Window::new("").id(egui::Id::new("Main"))
                 .show(egui_ctx, |ui| {
                     let RocketEntity(rocket_entity) =
                         self.world.get_resource::<RocketEntity>().unwrap();
                     self.fuel_bar(rocket_entity, ui);
                     self.rocket_info(rocket_entity, ui);
-                });
 
-            egui::Window::new("Simulation")
-                .default_rect(EguiRect::from_min_size(
-                    Pos2::new(0.0, screen_height() / 10.0 + 50.0),
-                    EguiVec::new(screen_width() / 3.0, screen_height() / 20.0),
-                ))
-                .show(egui_ctx, |ui| {
+                    ui.add_space(5.0);
+                    ui.separator();
+                    ui.add_space(5.0);
+
                     self.time_speed_slider(ui);
-                });
 
-            egui::Window::new("Speed")
-                .default_rect(EguiRect::from_min_size(
-                    Pos2::new(0.0, 2.0 * screen_height() / 10.0 + 50.0),
-                    EguiVec::new(250.0, 250.0),
-                ))
-                .show(egui_ctx, |ui| {
+                    ui.add_space(5.0);
+                    ui.separator();
+                    ui.add_space(5.0);
+
                     self.draw_graphs(ui);
                 });
         });
@@ -108,6 +98,8 @@ impl MainState {
         let rocket_entity = self.world.get_resource::<RocketEntity>().unwrap().0;
         let mut speed_graphs = self.world.query::<&SpeedGraph>();
         let speed_graph = &speed_graphs.get(&self.world, rocket_entity).unwrap().0;
+        ui.label("Speed:");
+        ui.add_space(2.5);
         ui.add(
             Plot::new("velocity").line(Line::new(Values::from_values_iter(
                 speed_graph
