@@ -56,7 +56,7 @@ pub fn trajectory_calculation_sys(
 
             // let mut iterations = 0;
             // let max_iterations = 750;
-            while trajectory.points.len() < trajectory.max_len
+            'trajectory: while trajectory.points.len() < trajectory.max_len
                 //&& iterations < max_iterations
                 && (get_time() - start_time) < max_time
             {
@@ -70,6 +70,8 @@ pub fn trajectory_calculation_sys(
                             calculate_planet_interaction((&kinematics, rocket), planet_info);
                         total_accel += accel;
                         total_damping *= damping;
+                    } else {
+                        break 'trajectory;
                     }
                 }
 

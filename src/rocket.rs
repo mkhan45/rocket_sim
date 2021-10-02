@@ -172,4 +172,16 @@ pub fn rocket_input_sys(mut query: Query<&mut Rocket>, dt: Res<crate::physics::D
             rocket.thrust = rocket.thrust.max(0.0);
         }
     }
+
+    if is_key_pressed(KeyCode::Q) {
+        for mut rocket in query.iter_mut() {
+            rocket.thrust = 0.0;
+        }
+    }
+
+    if is_key_pressed(KeyCode::E) {
+        for mut rocket in query.iter_mut() {
+            rocket.thrust = 1.0;
+        }
+    }
 }
