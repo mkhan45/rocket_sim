@@ -6,6 +6,8 @@ use crate::planet::CelestialBody;
 use crate::texture::Textures;
 use crate::trajectory::Trajectory;
 
+use crate::rocket::{RocketEntity, Rocket, draw_rocket};
+
 use bevy_ecs::prelude::*;
 
 pub struct MapRes {
@@ -30,6 +32,8 @@ pub fn draw_map_sys(
     planet_query: Query<(&CelestialBody, &Kinematics)>,
     trajectory_query: Query<&Trajectory>,
     textures: Res<Textures>,
+    rocket_query: Query<&Rocket>,
+    rocket_entity: Res<RocketEntity>,
 ) {
     const CAMERA_SCALE: f32 = 1.0 / 2000.0;
     let camera_pos = camera_res.camera.target;
@@ -55,11 +59,14 @@ pub fn draw_map_sys(
         );
 
         // rocket
-        draw_circle(
-            camera_res.camera.target.x,
-            camera_res.camera.target.y,
-            crate::SCREEN_WIDTH / 150.0,
-            RED,
+        let rocket_size = crate::SCREEN_WIDTH / 100.0;
+        let rocket = rocket_query.get(rocket_entity.0).unwrap();
+        draw_rocket(
+            &camera_res.camera.target,
+            rocket.angle,
+            rocket.thrust > 0.0 && rocket.current_fuel_mass > 0.0,
+            &textures,
+            rocket_size,
         );
 
         let (x_bounds, y_bounds) = {
@@ -90,8 +97,7 @@ pub fn draw_map_sys(
             }
         }
 
-        for trajectory in trajectory_query.iter()
-        {
+        for trajectory in trajectory_query.iter() {
             let fst_iter = trajectory.points.iter();
             let snd_iter = trajectory.points.iter().skip(1);
 

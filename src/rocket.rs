@@ -83,49 +83,20 @@ pub fn update_altitude_sys(
     }
 }
 
-pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures) {
-    // // body
-    // draw_rectangle(pos.x, pos.y, 5.0, 10.0, WHITE);
-    // // window
-    // draw_circle(pos.x + 2.5, pos.y + 3.5, 2.0, SKYBLUE);
-
-    // // top
-    // draw_triangle(
-    //     Vec2::new(pos.x + 6.5, pos.y),
-    //     Vec2::new(pos.x - 1.5, pos.y),
-    //     Vec2::new(pos.x + 2.5, pos.y - 5.0),
-    //     RED,
-    // );
-
-    // // left fin
-    // draw_triangle(
-    //     Vec2::new(pos.x + 5.0, pos.y + 10.0),
-    //     Vec2::new(pos.x + 5.0, pos.y + 5.0),
-    //     Vec2::new(pos.x + 7.0, pos.y + 10.0),
-    //     RED,
-    // );
-
-    // // right fin
-    // draw_triangle(
-    //     Vec2::new(pos.x, pos.y + 10.0),
-    //     Vec2::new(pos.x, pos.y + 5.0),
-    //     Vec2::new(pos.x - 2.0, pos.y + 10.0),
-    //     RED,
-    // );
-
+pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures, size: f32) {
     let (texture, height) = if thrust {
-        (TextureName::RocketBoost, 24.0)
+        (TextureName::RocketBoost, 2.4 * size)
     } else {
-        (TextureName::Rocket, 20.0)
+        (TextureName::Rocket, 2.0 * size)
     };
 
     draw_texture_ex(
         textures[texture],
-        pos.x - 5.0,
+        pos.x - size / 2.0,
         pos.y - height / 2.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(Vec2::new(10.0, height)),
+            dest_size: Some(Vec2::new(size, height)),
             rotation: angle,
             ..DrawTextureParams::default()
         },
@@ -142,6 +113,7 @@ pub fn draw_rocket_sys(
             rocket.angle,
             rocket.current_fuel_mass > 0.0 && rocket.thrust > 0.0,
             &textures,
+            10.0
         );
     }
 }

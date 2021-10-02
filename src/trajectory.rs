@@ -3,10 +3,10 @@ use std::collections::VecDeque;
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
+use crate::physics::Steps;
 use crate::physics::{calculate_planet_interaction, Kinematics, DT};
 use crate::planet::CelestialBody;
 use crate::rocket::{Rocket, RocketEntity};
-use crate::physics::Steps;
 
 pub struct Trajectory {
     pub points: VecDeque<Vec2>,
@@ -57,8 +57,7 @@ pub fn trajectory_calculation_sys(
             let max_time = 0.005;
 
             let max = trajectory.max_len + steps.0 / 2;
-            'trajectory: while trajectory.points.len() < max
-                && (get_time() - start_time) < max_time
+            'trajectory: while trajectory.points.len() < max && (get_time() - start_time) < max_time
             {
                 let mut total_accel = Vec2::new(0.0, 0.0);
                 let mut total_damping = 1.0;
