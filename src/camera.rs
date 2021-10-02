@@ -8,6 +8,18 @@ pub struct CameraRes {
     pub screen_size: Vec2,
 }
 
+impl CameraRes {
+    pub fn contains_point(&self, point: &Vec2) -> bool {
+        let camera_left = self.camera.target.x - self.screen_size.x / 2.0;
+        let camera_right = self.camera.target.x + self.screen_size.x / 2.0;
+        let camera_top = self.camera.target.y - self.screen_size.y / 2.0;
+        let camera_bottom = self.camera.target.y + self.screen_size.y / 2.0;
+
+        (camera_left..camera_right).contains(&point.x)
+            && (camera_top..camera_bottom).contains(&point.y)
+    }
+}
+
 impl Default for CameraRes {
     fn default() -> Self {
         let display_rect = Rect::new(

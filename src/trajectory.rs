@@ -6,6 +6,7 @@ use egui_macroquad::macroquad::prelude::*;
 use crate::physics::{calculate_planet_interaction, Kinematics, DT};
 use crate::planet::CelestialBody;
 use crate::rocket::{Rocket, RocketEntity};
+use crate::physics::Steps;
 
 pub struct Trajectory {
     pub points: VecDeque<Vec2>,
@@ -31,8 +32,9 @@ pub fn trajectory_calculation_sys(
     )>,
     dt: Res<DT>,
     rocket_entity: Res<RocketEntity>,
+    steps: Res<Steps>,
 ) {
-    let dt = dt.0;
+    let dt = dt.0 * 2.0;
     let rocket_mut_query = query_set.q0();
     let planet_query = query_set.q1();
     let main_rocket_query = query_set.q2();
@@ -54,13 +56,10 @@ pub fn trajectory_calculation_sys(
             let start_time = get_time();
             let max_time = 0.005;
 
-            // let mut iterations = 0;
-            // let max_iterations = 750;
-            'trajectory: while trajectory.points.len() < trajectory.max_len
-                //&& iterations < max_iterations
+            let max = trajectory.max_len + steps.0 / 2;
+            'trajectory: while trajectory.points.len() < max
                 && (get_time() - start_time) < max_time
             {
-                // iterations += 1;
                 let mut total_accel = Vec2::new(0.0, 0.0);
                 let mut total_damping = 1.0;
 

@@ -62,14 +62,20 @@ pub fn draw_map_sys(
             RED,
         );
 
+        let (x_bounds, y_bounds) = {
+            let x_bounds = (camera_pos.x - width / 2.0)..(camera_pos.x + width / 2.0);
+            let y_bounds = (camera_pos.y - height / 2.0)..(camera_pos.y + height / 2.0);
+            (x_bounds, y_bounds)
+        };
+
+        let in_map = |point: &Vec2| x_bounds.contains(&point.x) && y_bounds.contains(&point.y);
+
         for (planet, kinematics) in planet_query.iter() {
             let mut offset = camera_pos - kinematics.pos;
             offset.y *= -1.0;
             let pos = offset * CAMERA_SCALE + camera_pos;
 
-            if ((camera_pos.x - width / 2.0)..(camera_pos.x + height / 2.0)).contains(&pos.x)
-                && ((camera_pos.y - height / 2.0)..(camera_pos.y + height / 2.0)).contains(&pos.y)
-            {
+            if in_map(&pos) {
                 let size = planet.radius * 2.0 * CAMERA_SCALE;
                 draw_texture_ex(
                     textures[planet.texture],
@@ -85,7 +91,6 @@ pub fn draw_map_sys(
         }
 
         for trajectory in trajectory_query.iter()
-        /* .filter(|t| t.valid) */
         {
             let fst_iter = trajectory.points.iter();
             let snd_iter = trajectory.points.iter().skip(1);
@@ -99,7 +104,10 @@ pub fn draw_map_sys(
 
                 let fst = fst_offset * CAMERA_SCALE + camera_pos;
                 let snd = snd_offset * CAMERA_SCALE + camera_pos;
-                draw_line(fst.x, fst.y, snd.x, snd.y, 1.0, GREEN);
+
+                if in_map(&fst) && in_map(&snd) {
+                    draw_line(fst.x, fst.y, snd.x, snd.y, 1.0, GREEN);
+                }
             }
         }
     }
