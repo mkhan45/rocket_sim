@@ -88,10 +88,15 @@ impl MainState {
 
         ui.label(format!(
             "Velocity: <{:.2}, {:.2}>",
-            kinematics.vel.x, -kinematics.vel.y
+            kinematics.vel.x * 1000.0, -kinematics.vel.y * 1000.0
         ));
 
-        ui.label(format!("Altitude: {:.2}", altitude.0));
+        ui.label(format!(
+            "Position: <{:.2}, {:.2}>",
+            kinematics.pos.x, -kinematics.pos.y
+        ));
+
+        ui.label(format!("Altitude: {:.2}", altitude.height * 1000.0));
     }
 
     fn time_speed_slider(&mut self, ui: &mut egui::Ui) {

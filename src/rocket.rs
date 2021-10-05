@@ -22,18 +22,19 @@ impl Default for RocketBundle {
     fn default() -> Self {
         RocketBundle {
             kinematics: Kinematics {
-                pos: Vec2::new(0.0, -6015.0),
+                pos: Vec2::new(0.0, -6000.5),
                 ..Kinematics::default()
             },
             rocket: Rocket::default(),
             speed_graph: SpeedGraph(std::collections::VecDeque::new()),
-            altitude: Altitude(std::f32::MAX),
+            altitude: Altitude::default(),
         }
     }
 }
 
 pub struct RocketEntity(pub bevy_ecs::entity::Entity);
 
+#[derive(Copy, Clone)]
 pub struct Rocket {
     pub fuel_capacity: f32,
     pub current_fuel_mass: f32,
@@ -50,11 +51,11 @@ pub struct Rocket {
 impl Default for Rocket {
     fn default() -> Self {
         Rocket {
-            fuel_capacity: 1750.0,
-            current_fuel_mass: 1750.0,
+            fuel_capacity: 2500.0,
+            current_fuel_mass: 2500.0,
             non_fuel_mass: 100.0,
-            fuel_burn_rate: 10.0,
-            fuel_thrust_factor: 2_150.0,
+            fuel_burn_rate: 2.0,
+            fuel_thrust_factor: 1000.0,
             angle: 0.0,
             thrust: 1.0,
         }
@@ -67,18 +68,33 @@ impl Rocket {
     }
 }
 
-pub struct Altitude(pub f32);
+pub struct Altitude {
+    pub height: f32,
+    pub closest_planet: Entity,
+}
+
+impl Default for Altitude {
+    fn default() -> Self {
+        Altitude {
+            height: std::f32::MAX,
+            closest_planet: Entity::new(0),
+        }
+    }
+}
 
 pub fn update_altitude_sys(
     mut rocket_query: Query<(&mut Altitude, &Kinematics, &Rocket)>,
-    planet_query: Query<(&Kinematics, &CelestialBody)>,
+    planet_query: Query<(&Kinematics, &CelestialBody, Entity)>,
 ) {
     for (mut altitude, rocket_kinematics, _) in rocket_query.iter_mut() {
-        altitude.0 = std::f32::MAX;
-        for (planet_kinematics, planet) in planet_query.iter() {
-            altitude.0 = altitude
-                .0
-                .min((rocket_kinematics.pos - planet_kinematics.pos).length() - planet.radius);
+        altitude.height = std::f32::MAX;
+        for (planet_kinematics, planet, planet_entity) in planet_query.iter() {
+            let current_altitude =
+                (rocket_kinematics.pos - planet_kinematics.pos).length() - planet.radius;
+            if current_altitude < altitude.height {
+                altitude.height = current_altitude;
+                altitude.closest_planet = planet_entity;
+            }
         }
     }
 }
@@ -113,47 +129,68 @@ pub fn draw_rocket_sys(
             rocket.angle,
             rocket.current_fuel_mass > 0.0 && rocket.thrust > 0.0,
             &textures,
-            10.0
+            0.1,
         );
     }
 }
 
-pub fn rocket_input_sys(mut query: Query<&mut Rocket>, dt: Res<crate::physics::DT>) {
+pub fn rocket_input_sys(
+    mut query: Query<(&mut Rocket, Option<&mut Trajectory>)>,
+    dt: Res<crate::physics::DT>,
+) {
     if is_key_down(KeyCode::A) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.angle += 0.75 * dt.0;
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 
     if is_key_down(KeyCode::D) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.angle -= 0.75 * dt.0;
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 
     if is_key_down(KeyCode::Space) || is_key_down(KeyCode::C) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.thrust += 0.1 * dt.0;
             rocket.thrust = rocket.thrust.min(1.0);
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 
     if is_key_down(KeyCode::Z) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.thrust -= 0.1 * dt.0;
             rocket.thrust = rocket.thrust.max(0.0);
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 
     if is_key_pressed(KeyCode::Q) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.thrust = 0.0;
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 
     if is_key_pressed(KeyCode::E) {
-        for mut rocket in query.iter_mut() {
+        for (mut rocket, mut trajectory) in query.iter_mut() {
             rocket.thrust = 1.0;
+            if let Some(t) = trajectory.as_deref_mut() {
+                t.valid = false;
+            }
         }
     }
 }

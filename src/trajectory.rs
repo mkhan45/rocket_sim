@@ -3,9 +3,8 @@ use std::collections::VecDeque;
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
 
-use crate::physics::Steps;
-use crate::physics::{calculate_planet_interaction, Kinematics, DT};
-use crate::planet::CelestialBody;
+use crate::main_state::MainState;
+use crate::physics::{Kinematics, Steps, DT};
 use crate::rocket::{Rocket, RocketEntity};
 
 pub struct Trajectory {
@@ -24,67 +23,64 @@ impl Trajectory {
     }
 }
 
-pub fn trajectory_calculation_sys(
-    query_set: QuerySet<(
-        Query<(&mut Kinematics, &mut Trajectory, &Rocket)>,
-        Query<(&CelestialBody, &Kinematics)>,
-        Query<(&Kinematics, &Rocket)>,
-    )>,
-    dt: Res<DT>,
-    rocket_entity: Res<RocketEntity>,
-    steps: Res<Steps>,
-) {
-    let dt = dt.0 * 2.0;
-    let rocket_mut_query = query_set.q0();
-    let planet_query = query_set.q1();
-    let main_rocket_query = query_set.q2();
+pub fn _inspect_trajectory_pos_sys(query: Query<&Kinematics, With<Trajectory>>) {
+    for kinematics in query.iter() {
+        dbg!(kinematics.pos);
+    }
+}
 
-    let (main_rocket_kinematics, main_rocket) = main_rocket_query.get(rocket_entity.0).unwrap();
+impl MainState {
+    pub fn add_trajectory_points(&mut self) {
+        self.world.insert_resource(DT(1.0 / 10.0));
+        let steps = self.world.get_resource::<Steps>().unwrap().0;
+        let (main_rocket_kinematics, main_rocket) = {
+            let rocket_entity = self.world.get_resource::<RocketEntity>().unwrap().0;
+            let mut kinematics_query = self.world.query::<&Kinematics>();
+            let mut rocket_query = self.world.query::<&Rocket>();
+            (
+                *kinematics_query.get(&self.world, rocket_entity).unwrap(),
+                *rocket_query.get(&self.world, rocket_entity).unwrap(),
+            )
+        };
 
-    unsafe {
-        for (mut kinematics, mut trajectory, rocket) in rocket_mut_query.iter_unsafe() {
-            trajectory.valid = main_rocket.thrust == 0.0;
-            if !trajectory.valid {
-                *kinematics = *main_rocket_kinematics;
-                trajectory.points.clear();
-            }
-
-            while trajectory.points.len() >= trajectory.max_len {
-                trajectory.points.pop_front();
-            }
-
-            let start_time = get_time();
-            let max_time = 0.005;
-
-            let max = trajectory.max_len + steps.0 / 2;
-            'trajectory: while trajectory.points.len() < max && (get_time() - start_time) < max_time
+        {
+            let mut trajectory_query = self
+                .world
+                .query::<(&mut Trajectory, &mut Kinematics, &mut Rocket)>();
+            for (mut trajectory, mut kinematics, mut rocket) in
+                trajectory_query.iter_mut(&mut self.world)
             {
-                let mut total_accel = Vec2::new(0.0, 0.0);
-                let mut total_damping = 1.0;
-
-                for planet_info @ (planet, planet_kinematics) in planet_query.iter() {
-                    if (kinematics.pos - planet_kinematics.pos).length() > planet.radius {
-                        let (accel, damping) =
-                            calculate_planet_interaction((&kinematics, rocket), planet_info);
-                        total_accel += accel;
-                        total_damping *= damping;
-                    } else {
-                        break 'trajectory;
-                    }
+                if rocket.thrust > 0.0 {
+                    trajectory.valid = false;
                 }
-
-                kinematics.acc -= total_accel;
-                kinematics.vel *= total_damping.powf(dt);
-
-                let vel = kinematics.vel;
-                let accel = kinematics.acc;
-
-                kinematics.pos += vel * dt + 0.5 * accel * dt * dt;
-                kinematics.vel += accel * dt;
-                kinematics.acc = Vec2::new(0.0, 0.0);
-
-                trajectory.points.push_back(kinematics.pos);
+                if !trajectory.valid {
+                    trajectory.valid = true;
+                    trajectory.points.clear();
+                    *kinematics = main_rocket_kinematics;
+                    *rocket = main_rocket;
+                } else {
+                    trajectory.points.pop_front();
+                }
             }
         }
+
+        let mut trajectory_query = self.world.query::<(&mut Trajectory, &Kinematics)>();
+        let start_time = get_time();
+        let mut trajectory_filled = false;
+        while get_time() - start_time < 0.005 {
+            if trajectory_filled {
+                self.world.insert_resource(DT(1.0 / 60.0 * steps as f32));
+            }
+            self.trajectory_schedule.run(&mut self.world);
+            for (mut trajectory, kinematics) in trajectory_query.iter_mut(&mut self.world) {
+                if trajectory.points.len() == trajectory.max_len - 1 {
+                    trajectory_filled = true;
+                }
+                if trajectory.points.len() < trajectory.max_len - 1 {
+                    trajectory.points.push_back(kinematics.pos);
+                }
+            }
+        }
+        self.world.insert_resource(DT(1.0 / 60.0));
     }
 }

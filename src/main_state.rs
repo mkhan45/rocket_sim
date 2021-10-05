@@ -16,6 +16,7 @@ pub struct MainState {
     frame_schedule: Schedule,
     fixed_schedule: Schedule,
     draw_schedule: Schedule,
+    pub trajectory_schedule: Schedule,
     leftover_time: f32,
 }
 
@@ -27,8 +28,12 @@ impl MainState {
         fixed_schedule.add_stage(
             "physics",
             SystemStage::single_threaded()
-                .with_system(physics::rocket_thrust_sys.system())
-                .with_system(physics::rocket_planet_interaction_sys.system()),
+                .with_system(physics::rocket_thrust_sys.system().label("thrust"))
+                .with_system(
+                    physics::rocket_planet_interaction_sys
+                        .system()
+                        .after("thrust"),
+                ),
         );
         fixed_schedule.add_stage_after(
             "physics",
@@ -37,7 +42,35 @@ impl MainState {
                 .with_system(physics::integration_sys.system().label("integrate"))
                 .with_system(physics::reset_accel_sys.system().after("integrate"))
                 .with_system(graphs::rocket_graph_sys.system().after("integrate"))
-                .with_system(rocket::update_altitude_sys.system().after("integrate")),
+                .with_system(rocket::update_altitude_sys.system().after("integrate"))
+                .with_system(physics::rocket_crash_sys.system().after("integrate")),
+        );
+
+        let mut trajectory_schedule = Schedule::default();
+        trajectory_schedule.add_stage(
+            "physics",
+            SystemStage::single_threaded()
+                // .with_system(physics::trajectory_rocket_thrust_sys.system().label("thrust"))
+                .with_system(
+                    physics::trajectory_planet_interaction_sys
+                        .system()
+                        .after("thrust"),
+                ),
+        );
+        trajectory_schedule.add_stage_after(
+            "physics",
+            "integrate",
+            SystemStage::single_threaded()
+                .with_system(
+                    physics::trajectory_integration_sys
+                        .system()
+                        .label("integrate"),
+                )
+                .with_system(
+                    physics::trajectory_reset_accel_sys
+                        .system()
+                        .after("integrate"),
+                ), // .with_system(crate::trajectory::inspect_trajectory_pos_sys.system().after("integrate"))
         );
 
         let mut frame_schedule = Schedule::default();
@@ -45,8 +78,7 @@ impl MainState {
             "camera",
             SystemStage::single_threaded()
                 .with_system(camera::camera_follow_sys.system().label("follow"))
-                .with_system(camera::update_camera_sys.system().after("follow"))
-                .with_system(crate::trajectory::trajectory_calculation_sys.system()),
+                .with_system(camera::update_camera_sys.system().after("follow")),
         );
         frame_schedule.add_stage(
             "input",
@@ -59,7 +91,8 @@ impl MainState {
         draw_schedule.add_stage(
             "draw",
             SystemStage::single_threaded()
-                .with_system(crate::planet::draw_planet_sys.system().label("planets"))
+                .with_system(crate::planet::draw_atmosphere_sys.system().label("atmosphere"))
+                .with_system(crate::planet::draw_planet_sys.system().after("atmosphere").label("planets"))
                 .with_system(
                     crate::rocket::draw_rocket_sys
                         .system()
@@ -81,7 +114,7 @@ impl MainState {
         world
             .spawn()
             .insert_bundle(RocketBundle::default())
-            .insert(crate::trajectory::Trajectory::new(1000 * 60))
+            .insert(crate::trajectory::Trajectory::new(5 * 60))
             .id();
 
         world.insert_resource(crate::camera::CameraRes::default());
@@ -97,13 +130,13 @@ impl MainState {
             world,
             frame_schedule,
             fixed_schedule,
+            trajectory_schedule,
             draw_schedule,
             leftover_time: 0.0,
         }
     }
 
     pub fn draw(&mut self) -> Result<(), GameError> {
-        clear_background(BLACK);
         self.draw_schedule.run(&mut self.world);
         Ok(())
     }
@@ -130,6 +163,7 @@ impl MainState {
             self.leftover_time = acc_time - target_dt;
         }
 
+        self.add_trajectory_points();
         self.frame_schedule.run(&mut self.world);
         Ok(())
     }
@@ -150,8 +184,8 @@ pub fn draw_crashed_text_sys(
         draw_text(
             "Reload to restart",
             camera_res.camera.target.x - crate::SCREEN_WIDTH / 3.0,
-            camera_res.camera.target.y + 30.0,
-            24.0,
+            camera_res.camera.target.y,
+            1.0,
             RED,
         );
     }

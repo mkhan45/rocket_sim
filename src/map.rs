@@ -6,7 +6,7 @@ use crate::planet::CelestialBody;
 use crate::texture::Textures;
 use crate::trajectory::Trajectory;
 
-use crate::rocket::{RocketEntity, Rocket, draw_rocket};
+use crate::rocket::{draw_rocket, Rocket, RocketEntity};
 
 use bevy_ecs::prelude::*;
 
@@ -35,7 +35,7 @@ pub fn draw_map_sys(
     rocket_query: Query<&Rocket>,
     rocket_entity: Res<RocketEntity>,
 ) {
-    const CAMERA_SCALE: f32 = 1.0 / 2000.0;
+    const CAMERA_SCALE: f32 = 1.0 / 20_000.0;
     let camera_pos = camera_res.camera.target;
 
     if map_res.shown {
@@ -54,12 +54,12 @@ pub fn draw_map_sys(
             camera_res.camera.target.y - height / 2.0,
             width,
             height,
-            1.0,
+            0.01,
             RED,
         );
 
         // rocket
-        let rocket_size = crate::SCREEN_WIDTH / 100.0;
+        let rocket_size = crate::SCREEN_WIDTH / 125.0;
         let rocket = rocket_query.get(rocket_entity.0).unwrap();
         draw_rocket(
             &camera_res.camera.target,
@@ -112,7 +112,7 @@ pub fn draw_map_sys(
                 let snd = snd_offset * CAMERA_SCALE + camera_pos;
 
                 if in_map(&fst) && in_map(&snd) {
-                    draw_line(fst.x, fst.y, snd.x, snd.y, 1.0, GREEN);
+                    draw_line(fst.x, fst.y, snd.x, snd.y, 0.01, GREEN);
                 }
             }
         }

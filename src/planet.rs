@@ -1,4 +1,5 @@
 use crate::physics::Kinematics;
+use crate::rocket::{Altitude, RocketEntity};
 use crate::texture::{TextureName, Textures};
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::*;
@@ -16,23 +17,41 @@ pub fn add_planets(world: &mut World) {
         .spawn()
         .insert(CelestialBody {
             radius: 6000.0,
+            atmosphere_radius: 6700.0,
             mass: 600_000.0,
-            atmosphere_radius: 100_000.0,
             atmosphere_color: SKYBLUE,
             texture: TextureName::Earth,
         })
         .insert(Kinematics::default());
 }
 
+pub fn draw_atmosphere_sys(
+    altitude_query: Query<&Altitude>,
+    planet_query: Query<&CelestialBody>,
+    rocket_entity: Res<RocketEntity>,
+) {
+    let rocket_altitude = altitude_query.get(rocket_entity.0).unwrap();
+    let planet = planet_query.get(rocket_altitude.closest_planet).unwrap();
+
+    if rocket_altitude.height < planet.atmosphere_radius {
+        let base_color = planet.atmosphere_color.to_vec();
+        let atmosphere_proportion = rocket_altitude.height / (planet.atmosphere_radius - planet.radius);
+        let new_color = base_color * (1.0 - atmosphere_proportion);
+        clear_background(Color::from_vec(new_color));
+    } else {
+        clear_background(BLACK);
+    }
+}
+
 fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics, textures: &Textures) {
-    draw_radial_gradient(
-        kinematics.pos.x,
-        kinematics.pos.y,
-        planet.radius,
-        planet.atmosphere_radius,
-        planet.atmosphere_color,
-        BLACK,
-    );
+    // draw_radial_gradient(
+    //     kinematics.pos.x,
+    //     kinematics.pos.y,
+    //     planet.radius,
+    //     planet.atmosphere_radius,
+    //     planet.atmosphere_color,
+    //     BLACK,
+    // );
 
     let size = planet.radius * 2.0;
     draw_texture_ex(
@@ -53,7 +72,8 @@ pub fn draw_planet_sys(query: Query<(&CelestialBody, &Kinematics)>, textures: Re
     }
 }
 
-fn draw_radial_gradient(
+// TODO: Instead of drawing a gradient, change background depending on altitude and nearby planet?
+fn _draw_radial_gradient(
     x: f32,
     y: f32,
     inner_radius: f32,
