@@ -33,7 +33,7 @@ pub fn add_planets(world: &mut World) {
             atmosphere_radius: 1500.1,
             mass: 7_000.0,
             atmosphere_color: SKYBLUE,
-            texture: TextureName::Earth,
+            texture: TextureName::Moon,
         })
         .insert(Kinematics {
             pos: Vec2::new(0.0, 380_000.0),

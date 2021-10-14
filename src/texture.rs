@@ -4,6 +4,7 @@ use std::collections::HashMap;
 #[derive(PartialEq, Eq, Hash, Copy, Clone)]
 pub enum TextureName {
     Earth,
+    Moon,
     Rocket,
     RocketBoost,
 }
@@ -33,6 +34,14 @@ impl Default for Textures {
             TextureName::RocketBoost,
             Texture2D::from_file_with_format(
                 include_bytes!("../textures/rocket_boost.png"),
+                Some(ImageFormat::Png),
+            ),
+        );
+
+        map.insert(
+            TextureName::Moon,
+            Texture2D::from_file_with_format(
+                include_bytes!("../textures/moon.png"),
                 Some(ImageFormat::Png),
             ),
         );
