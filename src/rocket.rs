@@ -22,7 +22,7 @@ impl Default for RocketBundle {
     fn default() -> Self {
         RocketBundle {
             kinematics: Kinematics {
-                pos: Vec2::new(0.0, -6000.5),
+                pos: Vec2::new(0.0, 6000.5),
                 ..Kinematics::default()
             },
             rocket: Rocket::default(),
@@ -55,7 +55,7 @@ impl Default for Rocket {
             current_fuel_mass: 2500.0,
             non_fuel_mass: 100.0,
             fuel_burn_rate: 2.0,
-            fuel_thrust_factor: 1000.0,
+            fuel_thrust_factor: 500.0,
             angle: 0.0,
             thrust: 1.0,
         }
@@ -113,7 +113,7 @@ pub fn draw_rocket(pos: &Vec2, angle: f32, thrust: bool, textures: &Textures, si
         WHITE,
         DrawTextureParams {
             dest_size: Some(Vec2::new(size, height)),
-            rotation: angle,
+            rotation: std::f32::consts::PI + angle,
             ..DrawTextureParams::default()
         },
     );

@@ -26,7 +26,7 @@ impl Default for CameraRes {
             -crate::SCREEN_WIDTH / 2.0,
             -crate::SCREEN_HEIGHT,
             crate::SCREEN_WIDTH,
-            crate::SCREEN_HEIGHT,
+            -crate::SCREEN_HEIGHT,
         );
 
         CameraRes {

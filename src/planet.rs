@@ -61,6 +61,7 @@ fn draw_planet(planet: &CelestialBody, kinematics: &Kinematics, textures: &Textu
         WHITE,
         DrawTextureParams {
             dest_size: Some(Vec2::new(size, size)),
+            flip_y: true,
             ..DrawTextureParams::default()
         },
     );

@@ -35,6 +35,7 @@ macro_rules! generate_integration_systems {
 generate_integration_systems!(Without, integration_sys);
 generate_integration_systems!(With, trajectory_integration_sys);
 
+// TODO: Rocket accel/gravity wrong direction
 macro_rules! generate_rocket_thrust_systems {
     ($filter:ident, $name:ident) => {
         pub fn $name(
@@ -49,7 +50,7 @@ macro_rules! generate_rocket_thrust_systems {
                 let fuel_burned = rocket.fuel_burn_rate * dt.0 * rocket.thrust;
                 let thrust_force = fuel_burned * rocket.fuel_thrust_factor;
                 let thrust_accel = thrust_force / mass * crate::THRUST_MULTIPLIER;
-                kinematics.acc -= thrust_accel * Vec2::new(rocket.angle.sin(), rocket.angle.cos());
+                kinematics.acc += thrust_accel * Vec2::new(rocket.angle.sin(), rocket.angle.cos());
 
                 rocket.current_fuel_mass -= fuel_burned;
                 rocket.current_fuel_mass = rocket.current_fuel_mass.max(0.0);

@@ -50,7 +50,6 @@ impl MainState {
         trajectory_schedule.add_stage(
             "physics",
             SystemStage::single_threaded()
-                // .with_system(physics::trajectory_rocket_thrust_sys.system().label("thrust"))
                 .with_system(
                     physics::trajectory_planet_interaction_sys
                         .system()
@@ -70,7 +69,7 @@ impl MainState {
                     physics::trajectory_reset_accel_sys
                         .system()
                         .after("integrate"),
-                ), // .with_system(crate::trajectory::inspect_trajectory_pos_sys.system().after("integrate"))
+                ),
         );
 
         let mut frame_schedule = Schedule::default();

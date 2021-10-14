@@ -31,7 +31,7 @@ pub fn _inspect_trajectory_pos_sys(query: Query<&Kinematics, With<Trajectory>>) 
 
 impl MainState {
     pub fn add_trajectory_points(&mut self) {
-        self.world.insert_resource(DT(1.0 / 10.0));
+        self.world.insert_resource(DT(1.0 / 1.0));
         let steps = self.world.get_resource::<Steps>().unwrap().0;
         let (main_rocket_kinematics, main_rocket) = {
             let rocket_entity = self.world.get_resource::<RocketEntity>().unwrap().0;
@@ -69,12 +69,14 @@ impl MainState {
         let mut trajectory_filled = false;
         while get_time() - start_time < 0.005 {
             if trajectory_filled {
-                self.world.insert_resource(DT(1.0 / 60.0 * steps as f32));
+                // self.world.insert_resource(DT(1.0 / 60.0));
+                break;
             }
             self.trajectory_schedule.run(&mut self.world);
             for (mut trajectory, kinematics) in trajectory_query.iter_mut(&mut self.world) {
                 if trajectory.points.len() == trajectory.max_len - 1 {
                     trajectory_filled = true;
+                    break;
                 }
                 if trajectory.points.len() < trajectory.max_len - 1 {
                     trajectory.points.push_back(kinematics.pos);
