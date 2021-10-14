@@ -182,19 +182,25 @@ pub fn draw_crashed_text_sys(
     camera_res: bevy_ecs::prelude::Res<crate::camera::CameraRes>,
 ) {
     if rocket_crashed.0 {
-        draw_text(
-            "CRASHED",
-            camera_res.camera.target.x - crate::SCREEN_WIDTH / 5.0,
-            camera_res.camera.target.y,
-            36.0,
-            RED,
-        );
-        draw_text(
-            "Reload to restart",
-            camera_res.camera.target.x - crate::SCREEN_WIDTH / 3.0,
-            camera_res.camera.target.y,
-            1.0,
-            RED,
-        );
+        draw_text_ex("CRASHED", camera_res.camera.target.x - crate::SCREEN_WIDTH / 2.15, camera_res.camera.target.y, TextParams {
+            font_size: 48,
+            font_scale: 1.0 / 64.0,
+            color: RED,
+            ..Default::default()
+        });
+        // draw_text(
+        //     "CRASHED",
+        //     camera_res.camera.target.x - crate::SCREEN_WIDTH / 5.0,
+        //     camera_res.camera.target.y,
+        //     1.0,
+        //     RED,
+        // );
+        // draw_text(
+        //     "Reload to restart",
+        //     camera_res.camera.target.x - crate::SCREEN_WIDTH / 3.0,
+        //     camera_res.camera.target.y,
+        //     1.0,
+        //     RED,
+        // );
     }
 }
