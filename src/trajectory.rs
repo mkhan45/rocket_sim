@@ -46,8 +46,13 @@ pub fn _inspect_trajectory_pos_sys(query: Query<&Kinematics, With<Trajectory>>) 
 
 impl MainState {
     pub fn add_trajectory_points(&mut self) {
-        let mut clock = self.world.get_resource::<TrajectorySyncClock>().unwrap().clone();
-        self.world.insert_resource(DT(1.0 / 60.0 * clock.needed_ticks as f32));
+        let mut clock = self
+            .world
+            .get_resource::<TrajectorySyncClock>()
+            .unwrap()
+            .clone();
+        self.world
+            .insert_resource(DT(1.0 / 60.0 * clock.needed_ticks as f32));
 
         let steps = self.world.get_resource::<Steps>().unwrap().0;
         let (main_rocket_kinematics, main_rocket) = {

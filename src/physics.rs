@@ -6,6 +6,8 @@ use crate::planet::CelestialBody;
 use crate::rocket::RocketCrashed;
 use crate::trajectory::Trajectory;
 
+pub mod offset;
+
 pub struct DT(pub f32);
 pub struct Steps(pub usize);
 pub struct Mass(pub f32);

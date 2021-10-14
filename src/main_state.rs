@@ -43,7 +43,8 @@ impl MainState {
                 .with_system(physics::reset_accel_sys.system().after("integrate"))
                 .with_system(graphs::rocket_graph_sys.system().after("integrate"))
                 .with_system(rocket::update_altitude_sys.system().after("integrate"))
-                .with_system(physics::rocket_crash_sys.system().after("integrate")),
+                .with_system(physics::rocket_crash_sys.system().after("integrate"))
+                .with_system(physics::offset::update_offset_sys.system()),
         );
 
         let mut trajectory_schedule = Schedule::default();
@@ -131,6 +132,7 @@ impl MainState {
         world.insert_resource(crate::texture::Textures::default());
         world.insert_resource(crate::rocket::RocketCrashed(false));
         world.insert_resource(crate::trajectory::TrajectorySyncClock::default());
+        world.insert_resource(crate::physics::offset::UniverseOffset::default());
 
         crate::planet::add_planets(&mut world);
 
@@ -182,12 +184,17 @@ pub fn draw_crashed_text_sys(
     camera_res: bevy_ecs::prelude::Res<crate::camera::CameraRes>,
 ) {
     if rocket_crashed.0 {
-        draw_text_ex("CRASHED", camera_res.camera.target.x - crate::SCREEN_WIDTH / 2.15, camera_res.camera.target.y, TextParams {
-            font_size: 48,
-            font_scale: 1.0 / 64.0,
-            color: RED,
-            ..Default::default()
-        });
+        draw_text_ex(
+            "CRASHED",
+            camera_res.camera.target.x - crate::SCREEN_WIDTH / 2.15,
+            camera_res.camera.target.y,
+            TextParams {
+                font_size: 48,
+                font_scale: 1.0 / 64.0,
+                color: RED,
+                ..Default::default()
+            },
+        );
         // draw_text(
         //     "CRASHED",
         //     camera_res.camera.target.x - crate::SCREEN_WIDTH / 5.0,

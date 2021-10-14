@@ -13,6 +13,7 @@ pub struct CelestialBody {
 }
 
 pub fn add_planets(world: &mut World) {
+    // Earth
     world
         .spawn()
         .insert(CelestialBody {
@@ -23,6 +24,21 @@ pub fn add_planets(world: &mut World) {
             texture: TextureName::Earth,
         })
         .insert(Kinematics::default());
+
+    // Moon
+    world
+        .spawn()
+        .insert(CelestialBody {
+            radius: 1500.0,
+            atmosphere_radius: 1500.1,
+            mass: 7_000.0,
+            atmosphere_color: SKYBLUE,
+            texture: TextureName::Earth,
+        })
+        .insert(Kinematics {
+            pos: Vec2::new(0.0, 380_000.0),
+            ..Kinematics::default()
+        });
 }
 
 pub fn draw_atmosphere_sys(
