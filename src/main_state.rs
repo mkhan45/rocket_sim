@@ -121,7 +121,7 @@ impl MainState {
         world
             .spawn()
             .insert_bundle(RocketBundle::default())
-            .insert(crate::trajectory::Trajectory::new(5 * 60))
+            .insert(crate::trajectory::Trajectory::new(20 * 60))
             .id();
 
         world.insert_resource(crate::camera::CameraRes::default());

@@ -17,7 +17,7 @@ impl Default for TrajectorySyncClock {
     fn default() -> Self {
         TrajectorySyncClock {
             tick: 0,
-            needed_ticks: 60,
+            needed_ticks: 30,
         }
     }
 }
@@ -46,7 +46,9 @@ pub fn _inspect_trajectory_pos_sys(query: Query<&Kinematics, With<Trajectory>>) 
 
 impl MainState {
     pub fn add_trajectory_points(&mut self) {
-        self.world.insert_resource(DT(1.0 / 1.0));
+        let mut clock = self.world.get_resource::<TrajectorySyncClock>().unwrap().clone();
+        self.world.insert_resource(DT(1.0 / 60.0 * clock.needed_ticks as f32));
+
         let steps = self.world.get_resource::<Steps>().unwrap().0;
         let (main_rocket_kinematics, main_rocket) = {
             let rocket_entity = self.world.get_resource::<RocketEntity>().unwrap().0;
@@ -58,7 +60,6 @@ impl MainState {
             )
         };
 
-        let mut clock = self.world.get_resource::<TrajectorySyncClock>().unwrap().clone();
         let mut trajectory_len_diff = {
             let mut trajectory_query = self
                 .world
@@ -92,7 +93,9 @@ impl MainState {
             self.world.insert_resource(DT(steps as f32 * 1.0 / 60.0));
         }
         while get_time() - start_time < 0.005 && trajectory_len_diff > 0 {
-            self.trajectory_schedule.run(&mut self.world);
+            for _ in 0..5 {
+                self.trajectory_schedule.run(&mut self.world);
+            }
             let (mut trajectory, kinematics) =
                 trajectory_query.iter_mut(&mut self.world).next().unwrap();
             trajectory.points.push_back(kinematics.pos);
