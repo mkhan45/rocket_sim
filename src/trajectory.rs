@@ -7,6 +7,21 @@ use crate::main_state::MainState;
 use crate::physics::{Kinematics, Steps, DT};
 use crate::rocket::{Rocket, RocketEntity};
 
+#[derive(Copy, Clone)]
+pub struct TrajectorySyncClock {
+    pub tick: usize,
+    pub needed_ticks: usize,
+}
+
+impl Default for TrajectorySyncClock {
+    fn default() -> Self {
+        TrajectorySyncClock {
+            tick: 0,
+            needed_ticks: 60,
+        }
+    }
+}
+
 pub struct Trajectory {
     pub points: VecDeque<Vec2>,
     pub max_len: usize,
@@ -43,45 +58,45 @@ impl MainState {
             )
         };
 
-        {
+        let mut clock = self.world.get_resource::<TrajectorySyncClock>().unwrap().clone();
+        let mut trajectory_len_diff = {
             let mut trajectory_query = self
                 .world
                 .query::<(&mut Trajectory, &mut Kinematics, &mut Rocket)>();
-            for (mut trajectory, mut kinematics, mut rocket) in
-                trajectory_query.iter_mut(&mut self.world)
-            {
-                if rocket.thrust > 0.0 {
-                    trajectory.valid = false;
-                }
-                if !trajectory.valid {
-                    trajectory.valid = true;
-                    trajectory.points.clear();
-                    *kinematics = main_rocket_kinematics;
-                    *rocket = main_rocket;
-                } else {
-                    trajectory.points.pop_front();
-                }
+            let (mut trajectory, mut kinematics, mut rocket) =
+                trajectory_query.iter_mut(&mut self.world).next().unwrap();
+
+            if rocket.thrust > 0.0 {
+                trajectory.valid = false;
+            } else {
+                trajectory.valid = true;
             }
-        }
+
+            if !trajectory.valid {
+                trajectory.points.clear();
+                *kinematics = main_rocket_kinematics;
+                *rocket = main_rocket;
+            } else if clock.tick * steps >= clock.needed_ticks {
+                clock.tick = 0;
+                trajectory.points.pop_front();
+            }
+
+            clock.tick += 1;
+            trajectory.max_len - trajectory.points.len()
+        };
+        self.world.insert_resource(clock);
 
         let mut trajectory_query = self.world.query::<(&mut Trajectory, &Kinematics)>();
         let start_time = get_time();
-        let mut trajectory_filled = false;
-        while get_time() - start_time < 0.005 {
-            if trajectory_filled {
-                // self.world.insert_resource(DT(1.0 / 60.0));
-                break;
-            }
+        if trajectory_len_diff == 1 {
+            self.world.insert_resource(DT(steps as f32 * 1.0 / 60.0));
+        }
+        while get_time() - start_time < 0.005 && trajectory_len_diff > 0 {
             self.trajectory_schedule.run(&mut self.world);
-            for (mut trajectory, kinematics) in trajectory_query.iter_mut(&mut self.world) {
-                if trajectory.points.len() == trajectory.max_len - 1 {
-                    trajectory_filled = true;
-                    break;
-                }
-                if trajectory.points.len() < trajectory.max_len - 1 {
-                    trajectory.points.push_back(kinematics.pos);
-                }
-            }
+            let (mut trajectory, kinematics) =
+                trajectory_query.iter_mut(&mut self.world).next().unwrap();
+            trajectory.points.push_back(kinematics.pos);
+            trajectory_len_diff -= 1;
         }
         self.world.insert_resource(DT(1.0 / 60.0));
     }

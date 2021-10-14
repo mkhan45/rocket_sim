@@ -49,12 +49,11 @@ impl MainState {
         let mut trajectory_schedule = Schedule::default();
         trajectory_schedule.add_stage(
             "physics",
-            SystemStage::single_threaded()
-                .with_system(
-                    physics::trajectory_planet_interaction_sys
-                        .system()
-                        .after("thrust"),
-                ),
+            SystemStage::single_threaded().with_system(
+                physics::trajectory_planet_interaction_sys
+                    .system()
+                    .after("thrust"),
+            ),
         );
         trajectory_schedule.add_stage_after(
             "physics",
@@ -90,8 +89,17 @@ impl MainState {
         draw_schedule.add_stage(
             "draw",
             SystemStage::single_threaded()
-                .with_system(crate::planet::draw_atmosphere_sys.system().label("atmosphere"))
-                .with_system(crate::planet::draw_planet_sys.system().after("atmosphere").label("planets"))
+                .with_system(
+                    crate::planet::draw_atmosphere_sys
+                        .system()
+                        .label("atmosphere"),
+                )
+                .with_system(
+                    crate::planet::draw_planet_sys
+                        .system()
+                        .after("atmosphere")
+                        .label("planets"),
+                )
                 .with_system(
                     crate::rocket::draw_rocket_sys
                         .system()
@@ -122,6 +130,7 @@ impl MainState {
         world.insert_resource(crate::map::MapRes::default());
         world.insert_resource(crate::texture::Textures::default());
         world.insert_resource(crate::rocket::RocketCrashed(false));
+        world.insert_resource(crate::trajectory::TrajectorySyncClock::default());
 
         crate::planet::add_planets(&mut world);
 

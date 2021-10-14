@@ -35,7 +35,8 @@ pub fn draw_atmosphere_sys(
 
     if rocket_altitude.height < planet.atmosphere_radius {
         let base_color = planet.atmosphere_color.to_vec();
-        let atmosphere_proportion = rocket_altitude.height / (planet.atmosphere_radius - planet.radius);
+        let atmosphere_proportion =
+            rocket_altitude.height / (planet.atmosphere_radius - planet.radius);
         let new_color = base_color * (1.0 - atmosphere_proportion);
         clear_background(Color::from_vec(new_color));
     } else {

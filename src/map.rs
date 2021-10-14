@@ -82,7 +82,8 @@ pub fn draw_map_sys(
             offset.y *= -1.0;
             let pos = offset * CAMERA_SCALE + camera_pos;
 
-            if in_map(&pos) {
+            let radius_vec = Vec2::splat(planet.radius * CAMERA_SCALE);
+            if in_map(&(pos - radius_vec)) || in_map(&(pos + radius_vec)) {
                 let size = planet.radius * 2.0 * CAMERA_SCALE;
                 draw_texture_ex(
                     textures[planet.texture],

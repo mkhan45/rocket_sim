@@ -88,7 +88,8 @@ impl MainState {
 
         ui.label(format!(
             "Velocity: <{:.2}, {:.2}>",
-            kinematics.vel.x * 1000.0, kinematics.vel.y * 1000.0
+            kinematics.vel.x * 1000.0,
+            kinematics.vel.y * 1000.0
         ));
 
         ui.label(format!(
