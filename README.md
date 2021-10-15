@@ -6,3 +6,4 @@ Controls:
 - A, D to tilt CCW/CW
 - M to show a map with calculated trajectory
   - The trajectory can only accumulate when throttle is completely disabled
+- Up/Down to change map scale

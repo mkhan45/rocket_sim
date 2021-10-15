@@ -1,8 +1,8 @@
 use bevy_ecs::prelude::*;
 use egui_macroquad::macroquad::prelude::Vec2;
 
-use crate::rocket::RocketEntity;
 use crate::physics::Kinematics;
+use crate::rocket::RocketEntity;
 
 pub struct UniverseOffset {
     pub offset: Vec2,

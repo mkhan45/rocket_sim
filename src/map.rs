@@ -12,7 +12,7 @@ use bevy_ecs::prelude::*;
 
 pub struct MapRes {
     pub position: Vec2,
-    pub scale: Vec2,
+    pub scale: f32,
     pub shown: bool,
 }
 
@@ -20,7 +20,7 @@ impl Default for MapRes {
     fn default() -> Self {
         MapRes {
             position: Vec2::new(0.0, 0.0),
-            scale: Vec2::new(1.0, 1.0),
+            scale: 1.0,
             shown: false,
         }
     }
@@ -35,7 +35,7 @@ pub fn draw_map_sys(
     rocket_query: Query<&Rocket>,
     rocket_entity: Res<RocketEntity>,
 ) {
-    const CAMERA_SCALE: f32 = 1.0 / 20_000.0;
+    let scale: f32 = 1.0 / 20_000.0 / map_res.scale;
     let camera_pos = camera_res.camera.target;
 
     if map_res.shown {
@@ -59,15 +59,26 @@ pub fn draw_map_sys(
         );
 
         // rocket
-        let rocket_size = crate::SCREEN_WIDTH / 125.0;
-        let rocket = rocket_query.get(rocket_entity.0).unwrap();
-        draw_rocket(
-            &camera_res.camera.target,
-            rocket.angle,
-            rocket.thrust > 0.0 && rocket.current_fuel_mass > 0.0,
-            &textures,
-            rocket_size,
-        );
+        if map_res.scale > 2.0 {
+            // red dot
+            draw_circle(
+                camera_res.camera.target.x,
+                camera_res.camera.target.y,
+                crate::SCREEN_WIDTH / 250.0,
+                RED,
+            );
+        } else {
+            // rocket texture
+            let rocket_size = crate::SCREEN_WIDTH / 125.0 / map_res.scale;
+            let rocket = rocket_query.get(rocket_entity.0).unwrap();
+            draw_rocket(
+                &camera_res.camera.target,
+                rocket.angle,
+                rocket.thrust > 0.0 && rocket.current_fuel_mass > 0.0,
+                &textures,
+                rocket_size,
+            );
+        }
 
         let (x_bounds, y_bounds) = {
             let x_bounds = (camera_pos.x - width / 2.0)..(camera_pos.x + width / 2.0);
@@ -80,11 +91,11 @@ pub fn draw_map_sys(
         for (planet, kinematics) in planet_query.iter() {
             let mut offset = camera_pos - kinematics.pos;
             offset.y *= -1.0;
-            let pos = offset * CAMERA_SCALE + camera_pos;
+            let pos = offset * scale + camera_pos;
 
-            let radius_vec = Vec2::splat(planet.radius * CAMERA_SCALE);
+            let radius_vec = Vec2::splat(planet.radius * scale);
             if in_map(&(pos - radius_vec)) || in_map(&(pos + radius_vec)) {
-                let size = planet.radius * 2.0 * CAMERA_SCALE;
+                let size = planet.radius * 2.0 * scale;
                 draw_texture_ex(
                     textures[planet.texture],
                     pos.x - size / 2.0,
@@ -109,11 +120,11 @@ pub fn draw_map_sys(
                 let mut snd_offset = camera_pos - *snd;
                 snd_offset.y *= -1.0;
 
-                let fst = fst_offset * CAMERA_SCALE + camera_pos;
-                let snd = snd_offset * CAMERA_SCALE + camera_pos;
+                let fst = fst_offset * scale + camera_pos;
+                let snd = snd_offset * scale + camera_pos;
 
                 if in_map(&fst) && in_map(&snd) {
-                    draw_line(fst.x, fst.y, snd.x, snd.y, 0.01, GREEN);
+                    draw_line(fst.x, fst.y, snd.x, snd.y, 0.005 / map_res.scale, GREEN);
                 }
             }
         }
@@ -124,7 +135,12 @@ pub fn map_input_sys(mut map_res: ResMut<MapRes>) {
     if is_key_pressed(KeyCode::M) {
         map_res.shown = !map_res.shown;
     }
-}
 
-// pub fn update_trajectories_sys() {
-// }
+    if is_key_down(KeyCode::Up) {
+        map_res.scale = map_res.scale + 0.25;
+    }
+
+    if is_key_down(KeyCode::Down) {
+        map_res.scale = (map_res.scale - 0.25).max(0.5);
+    }
+}

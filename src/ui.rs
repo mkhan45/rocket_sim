@@ -13,8 +13,8 @@ use egui_macroquad::egui::Rect as EguiRect;
 use egui_macroquad::macroquad::prelude::Rect;
 
 use crate::graphs::SpeedGraph;
-use crate::rocket::Altitude;
 use crate::physics::offset::UniverseOffset;
+use crate::rocket::Altitude;
 
 fn _to_egui_rect(rect: &Rect) -> EguiRect {
     EguiRect::from_two_pos(
@@ -96,7 +96,8 @@ impl MainState {
 
         ui.label(format!(
             "Position: <{:.2}, {:.2}>",
-            kinematics.pos.x + offset.x, kinematics.pos.y + offset.y
+            kinematics.pos.x + offset.x,
+            kinematics.pos.y + offset.y
         ));
 
         ui.label(format!("Altitude: {:.2}", altitude.height * 1000.0));
